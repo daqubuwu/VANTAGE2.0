@@ -11,6 +11,7 @@ import type {
   PlayerMatch,
   PlayerPeer,
   PlayerProfile,
+  PlayerTotalsField,
   SearchHit,
 } from './types'
 
@@ -103,6 +104,19 @@ export function usePlayerHistory(accountId: number | undefined) {
   return useQuery({
     queryKey: ['player', accountId, 'history', HISTORY_SIZE],
     queryFn: () => openDota.playerHistory(accountId as number, HISTORY_SIZE) as Promise<PlayerMatch[]>,
+    enabled: accountId !== undefined && Number.isFinite(accountId),
+    ...options('playerMatches'),
+  })
+}
+
+export function usePlayerTotals(accountId: number | undefined, days: number | null, heroId?: number) {
+  return useQuery({
+    queryKey: ['player', accountId, 'totals', days, heroId],
+    queryFn: () =>
+      openDota.playerTotals(accountId as number, {
+        ...(days !== null ? { date: days } : {}),
+        ...(heroId !== undefined ? { hero_id: heroId } : {}),
+      }) as Promise<PlayerTotalsField[]>,
     enabled: accountId !== undefined && Number.isFinite(accountId),
     ...options('playerMatches'),
   })

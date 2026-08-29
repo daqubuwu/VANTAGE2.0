@@ -4,6 +4,7 @@ import {
   usePlayer,
   usePlayerMatches,
   usePlayerHistory,
+  usePlayerTotals,
   useHeroes,
   usePlayerHeroes,
   HISTORY_SIZE,
@@ -18,7 +19,8 @@ import { TopHeroes } from '@/features/player/TopHeroes'
 import { HeroBenchmarks } from '@/features/player/HeroBenchmarks'
 import { Tabs } from '@/features/player/Tabs'
 import { usePlayerStats } from '@/features/player/usePlayerStats'
-import { periodLabel } from '@/features/player/period'
+import { totalsCount, totalsMean } from '@/features/player/totals'
+import { periodDays, periodLabel } from '@/features/player/period'
 import type { PeriodKey } from '@/features/player/period'
 import { Section } from '@/shared/ui/Surface'
 import { Skeleton } from '@/shared/ui/Skeleton'
@@ -45,6 +47,7 @@ export function PlayerPage() {
 
   const profile = usePlayer(valid ? accountId : undefined)
   const history = usePlayerHistory(valid ? accountId : undefined)
+  const totals = usePlayerTotals(valid ? accountId : undefined, periodDays(period))
   const heroes = useHeroes()
   const playerHeroes = usePlayerHeroes(valid ? accountId : undefined)
   const paged = usePlayerMatches(matchesTabOpened && valid ? accountId : undefined)
@@ -77,6 +80,14 @@ export function PlayerPage() {
       ? `${num(stats.games)} ${plural(stats.games, 'матч', 'матча', 'матчей')} ${periodLabel(period)}`
       : `нет матчей ${periodLabel(period)}`
 
+  const avgGpm = totalsMean(totals.data, 'gold_per_min')
+  const avgXpm = totalsMean(totals.data, 'xp_per_min')
+  const avgHeroDamage = totalsMean(totals.data, 'hero_damage')
+  const gpmCount = totalsCount(totals.data, 'gold_per_min')
+  const xpmCount = totalsCount(totals.data, 'xp_per_min')
+  const heroDamageCount = totalsCount(totals.data, 'hero_damage')
+  const formPending = history.isPending || totals.isPending
+
   return (
     <div className="flex flex-col gap-6">
       <PlayerHeader accountId={accountId} profile={profile.data} loading={profile.isPending} />
@@ -95,7 +106,7 @@ export function PlayerPage() {
         <div className="flex flex-col gap-6">
           <PeriodFilter value={period} onChange={setPeriod} />
 
-          {history.isPending ? (
+          {formPending ? (
             <div className="flex flex-col gap-4">
               <div className="flex items-baseline justify-between gap-4">
                 <h2 className="text-[16px] font-semibold text-ink">Форма</h2>
@@ -153,40 +164,40 @@ export function PlayerPage() {
                   },
                   {
                     label: 'GPM',
-                    value: num(stats.avgGpm),
+                    value: num(avgGpm),
                     sub: 'золото в минуту',
                     tone: 'gold',
                     explain: (
                       <MathTooltip
-                        formula="среднее золото в минуту по матчам периода"
-                        inputs={[{ label: 'Матчей учтено', value: String(stats.games) }]}
-                        note={`Период: ${periodLabel(period)}.`}
+                        formula="сумма золота в минуту / число матчей с этим показателем"
+                        inputs={[{ label: 'Матчей учтено', value: String(gpmCount) }]}
+                        note={`Период: ${periodLabel(period)}. Источник: OpenDota /totals.`}
                       />
                     ),
                   },
                   {
                     label: 'XPM',
-                    value: num(stats.avgXpm),
+                    value: num(avgXpm),
                     sub: 'опыт в минуту',
                     tone: 'xp',
                     explain: (
                       <MathTooltip
-                        formula="средний опыт в минуту по матчам периода"
-                        inputs={[{ label: 'Матчей учтено', value: String(stats.games) }]}
-                        note={`Период: ${periodLabel(period)}.`}
+                        formula="сумма опыта в минуту / число матчей с этим показателем"
+                        inputs={[{ label: 'Матчей учтено', value: String(xpmCount) }]}
+                        note={`Период: ${periodLabel(period)}. Источник: OpenDota /totals.`}
                       />
                     ),
                   },
                   {
                     label: 'Урон',
-                    value: compact(stats.avgHeroDamage),
+                    value: compact(avgHeroDamage),
                     sub: 'по героям за матч',
                     tone: 'dmg',
                     explain: (
                       <MathTooltip
-                        formula="средний урон по героям за матч"
-                        inputs={[{ label: 'Матчей учтено', value: String(stats.games) }]}
-                        note={`Период: ${periodLabel(period)}. Итог по матчу, не по минутам.`}
+                        formula="сумма урона по героям / число матчей с этим показателем"
+                        inputs={[{ label: 'Матчей учтено', value: String(heroDamageCount) }]}
+                        note={`Период: ${periodLabel(period)}. Источник: OpenDota /totals, итог по матчу, не по минутам.`}
                       />
                     ),
                   },
@@ -243,9 +254,9 @@ export function PlayerPage() {
           <Section title="Против медианы" aside="OpenDota, от 5 игр на герое">
             <HeroBenchmarks
               playerHeroes={playerHeroes.data ?? []}
-              matches={all}
+              accountId={valid ? accountId : undefined}
               heroes={heroes.data}
-              loading={playerHeroes.isPending || history.isPending}
+              loading={playerHeroes.isPending}
             />
           </Section>
         </div>

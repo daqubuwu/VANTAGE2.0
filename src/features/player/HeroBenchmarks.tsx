@@ -2,8 +2,8 @@ import { useQueries } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { openDota } from '@/shared/api/opendota'
 import { freshness } from '@/shared/cache/freshness'
-import type { Hero, HeroBenchmarkResponse, PlayerHeroRow, PlayerMatch } from '@/shared/api/types'
-import { aggregate } from './aggregate'
+import type { Hero, HeroBenchmarkResponse, PlayerHeroRow, PlayerTotalsField } from '@/shared/api/types'
+import { totalsMean } from './totals'
 import { deltaShare, medianValue } from './benchmark'
 import { HeroIcon } from '@/shared/ui/HeroIcon'
 import { Skeleton } from '@/shared/ui/Skeleton'
@@ -16,12 +16,12 @@ const MIN_GAMES = 5
 
 interface HeroBenchmarksProps {
   playerHeroes: PlayerHeroRow[]
-  matches: PlayerMatch[]
+  accountId: number | undefined
   heroes: Map<number, Hero> | undefined
   loading: boolean
 }
 
-export function HeroBenchmarks({ playerHeroes, matches, heroes, loading }: HeroBenchmarksProps) {
+export function HeroBenchmarks({ playerHeroes, accountId, heroes, loading }: HeroBenchmarksProps) {
   const top = useMemo(
     () =>
       [...playerHeroes]
@@ -40,6 +40,18 @@ export function HeroBenchmarks({ playerHeroes, matches, heroes, loading }: HeroB
       staleTime: freshness.meta.staleTime,
       gcTime: freshness.meta.gcTime,
       meta: { persist: freshness.meta.persist },
+    })),
+  })
+
+  const ownTotalsQueries = useQueries({
+    queries: heroIds.map((heroId) => ({
+      queryKey: ['player', accountId, 'totals', null, heroId],
+      queryFn: () =>
+        openDota.playerTotals(accountId as number, { hero_id: heroId }) as Promise<PlayerTotalsField[]>,
+      enabled: accountId !== undefined && Number.isFinite(accountId),
+      staleTime: freshness.playerMatches.staleTime,
+      gcTime: freshness.playerMatches.gcTime,
+      meta: { persist: freshness.playerMatches.persist },
     })),
   })
 
@@ -67,11 +79,13 @@ export function HeroBenchmarks({ playerHeroes, matches, heroes, loading }: HeroB
       {top.map((row, index) => {
         const heroId = heroIds[index]
         const hero = heroId === undefined ? undefined : heroes?.get(heroId)
-        const own = aggregate(matches.filter((match) => match.hero_id === heroId))
         const benchmark = benchmarkQueries[index]
-        const pending = benchmark?.isPending ?? true
+        const ownTotals = ownTotalsQueries[index]
+        const pending = (benchmark?.isPending ?? true) || (ownTotals?.isPending ?? true)
         const gpmMedian = medianValue(benchmark?.data?.result.gold_per_min)
         const xpmMedian = medianValue(benchmark?.data?.result.xp_per_min)
+        const ownGpm = totalsMean(ownTotals?.data, 'gold_per_min')
+        const ownXpm = totalsMean(ownTotals?.data, 'xp_per_min')
 
         return (
           <div key={row.hero_id} className="flex flex-wrap items-center gap-x-6 gap-y-2 py-3">
@@ -80,8 +94,8 @@ export function HeroBenchmarks({ playerHeroes, matches, heroes, loading }: HeroB
               <span className="truncate text-[13px] text-ink">{hero?.localized_name ?? '—'}</span>
             </span>
 
-            <BenchmarkCell label="GPM" own={own.avgGpm} median={gpmMedian} pending={pending} />
-            <BenchmarkCell label="XPM" own={own.avgXpm} median={xpmMedian} pending={pending} />
+            <BenchmarkCell label="GPM" own={ownGpm} median={gpmMedian} pending={pending} />
+            <BenchmarkCell label="XPM" own={ownXpm} median={xpmMedian} pending={pending} />
           </div>
         )
       })}

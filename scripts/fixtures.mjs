@@ -85,6 +85,25 @@ export const playerHeroes = HERO_NAMES.map(([id]) => {
 
 export const peers = []
 
+export function totals(heroId) {
+  if (heroId !== undefined) {
+    return [
+      { field: 'gold_per_min', n: 12, sum: 12 * (480 + (heroId % 7) * 3) },
+      { field: 'xp_per_min', n: 12, sum: 12 * (540 + (heroId % 7) * 3) },
+    ]
+  }
+  return [
+    { field: 'kills', n: 40, sum: 320 },
+    { field: 'deaths', n: 40, sum: 220 },
+    { field: 'assists', n: 40, sum: 480 },
+    { field: 'gold_per_min', n: 40, sum: 40 * 520 },
+    { field: 'xp_per_min', n: 40, sum: 40 * 610 },
+    { field: 'hero_damage', n: 40, sum: 40 * 24000 },
+    { field: 'tower_damage', n: 40, sum: 40 * 3200 },
+    { field: 'last_hits', n: 40, sum: 40 * 210 },
+  ]
+}
+
 export function benchmarks(heroId) {
   const curve = (base, spread) =>
     [0.1, 0.25, 0.5, 0.75, 0.9, 0.99].map((percentile) => ({

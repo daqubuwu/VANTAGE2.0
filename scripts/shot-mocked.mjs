@@ -1,5 +1,5 @@
 import { chromium } from 'playwright'
-import { heroes, player, matches, playerHeroes, peers, benchmarks } from './fixtures.mjs'
+import { heroes, player, matches, playerHeroes, peers, benchmarks, totals } from './fixtures.mjs'
 
 const path = process.argv[2] ?? '/player/898936527'
 const out = process.argv[3] ?? '/tmp/shot.png'
@@ -47,6 +47,10 @@ await page.route('**://api.opendota.com/api/**', (route) => {
   }
   if (p === '/search') return json([])
   if (p === '/benchmarks') return json(benchmarks(Number(url.searchParams.get('hero_id') ?? 0)))
+  if (p === '/players/898936527/totals') {
+    const heroId = url.searchParams.get('hero_id')
+    return json(totals(heroId ? Number(heroId) : undefined))
+  }
   return json([])
 })
 

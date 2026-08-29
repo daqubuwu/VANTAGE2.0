@@ -22,7 +22,8 @@ export const openDota = {
     getJson<unknown[]>(url(`/players/${id}/matches`, { limit })),
   playerHeroes: (id: number) => getJson<unknown[]>(url(`/players/${id}/heroes`)),
   playerPeers: (id: number) => getJson<unknown[]>(url(`/players/${id}/peers`)),
-  playerTotals: (id: number) => getJson<unknown[]>(url(`/players/${id}/totals`)),
+  playerTotals: (id: number, params?: Record<string, string | number>) =>
+    getJson<unknown[]>(url(`/players/${id}/totals`, params)),
   playerCounts: (id: number) => getJson<unknown>(url(`/players/${id}/counts`)),
   playerHistograms: (id: number, field: string) =>
     getJson<unknown[]>(url(`/players/${id}/histograms/${field}`)),

@@ -90,6 +90,12 @@ export interface PlayerPeer {
   with_win: number
 }
 
+export interface PlayerTotalsField {
+  field: string
+  n: number
+  sum: number
+}
+
 export interface Benchmark {
   raw: number | null
   pct: number | null
