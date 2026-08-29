@@ -1,4 +1,4 @@
-import type { TimingRow } from './timingWindows'
+import type { TimingRow } from './timing'
 import { winrateColor } from '@/features/player/chartColor'
 import { Bar } from '@/shared/ui/Stat'
 import { EmptyState } from '@/shared/ui/States'
