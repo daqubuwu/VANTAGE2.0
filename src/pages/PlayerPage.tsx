@@ -14,6 +14,7 @@ import { PlayerHeader } from '@/features/player/PlayerHeader'
 import { PeriodFilter } from '@/features/player/PeriodFilter'
 import { StatStrip } from '@/features/player/StatStrip'
 import { ActivityGraph } from '@/features/player/ActivityGraph'
+import { WinrateTrend } from '@/features/player/WinrateTrend'
 import { MatchList, LoadMore } from '@/features/player/MatchList'
 import { TopHeroes } from '@/features/player/TopHeroes'
 import { HeroBenchmarks } from '@/features/player/HeroBenchmarks'
@@ -217,6 +218,8 @@ export function PlayerPage() {
               />
             </Section>
           )}
+
+          <WinrateTrend matches={all} loading={history.isPending} />
 
           {history.isPending ? (
             <Skeleton className="h-[190px] w-full rounded-panel" />

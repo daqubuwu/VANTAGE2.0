@@ -80,9 +80,16 @@ export function aggregate(matches: PlayerMatch[]): PlayerAggregate {
   }
 }
 
-export function rollingWinrate(matches: PlayerMatch[], window = 10) {
+export interface RollingWinratePoint {
+  time: number
+  value: number
+  games: number
+  fullWindow: boolean
+}
+
+export function rollingWinrate(matches: PlayerMatch[], window = 10): RollingWinratePoint[] {
   const ordered = [...matches].sort((a, b) => a.start_time - b.start_time)
-  const points: { time: number; value: number }[] = []
+  const points: RollingWinratePoint[] = []
   for (let i = 0; i < ordered.length; i += 1) {
     const slice = ordered.slice(Math.max(0, i - window + 1), i + 1)
     const decided = slice.filter((m) => isWin(m) !== null)
@@ -90,7 +97,12 @@ export function rollingWinrate(matches: PlayerMatch[], window = 10) {
     const wins = decided.filter((m) => isWin(m) === true).length
     const match = ordered[i]
     if (!match) continue
-    points.push({ time: match.start_time, value: wins / decided.length })
+    points.push({
+      time: match.start_time,
+      value: wins / decided.length,
+      games: decided.length,
+      fullWindow: decided.length >= window,
+    })
   }
   return points
 }

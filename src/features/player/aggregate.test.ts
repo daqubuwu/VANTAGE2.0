@@ -92,6 +92,8 @@ describe('rollingWinrate', () => {
     expect(points).toHaveLength(2)
     expect(points[0]?.value).toBe(1)
     expect(points[1]?.value).toBe(0.5)
+    expect(points[1]?.games).toBe(2)
+    expect(points[1]?.fullWindow).toBe(false)
   })
 
   it('матчи без исхода пропускаются', () => {
