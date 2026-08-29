@@ -33,6 +33,12 @@ export function signed(value: number | null | undefined, fallback = '—') {
   return value > 0 ? `+${num(value)}` : num(value)
 }
 
+export function signedPct(value: number | null | undefined, fallback = '—') {
+  if (value === null || value === undefined || Number.isNaN(value)) return fallback
+  const rounded = Math.round(value * 100)
+  return rounded > 0 ? `+${rounded}%` : `${rounded}%`
+}
+
 export function mmss(seconds: number | null | undefined, fallback = '—') {
   if (seconds === null || seconds === undefined || Number.isNaN(seconds)) return fallback
   const sign = seconds < 0 ? '-' : ''

@@ -84,3 +84,24 @@ export const playerHeroes = HERO_NAMES.map(([id]) => {
 })
 
 export const peers = []
+
+export function benchmarks(heroId) {
+  const curve = (base, spread) =>
+    [0.1, 0.25, 0.5, 0.75, 0.9, 0.99].map((percentile) => ({
+      percentile,
+      value: Math.round(base + (percentile - 0.5) * spread + (heroId % 7) * 3),
+    }))
+
+  return {
+    hero_id: heroId,
+    result: {
+      gold_per_min: curve(480, 260),
+      xp_per_min: curve(540, 300),
+      kills_per_min: curve(0.12, 0.1),
+      last_hits_per_min: curve(5, 3),
+      hero_damage_per_min: curve(420, 260),
+      hero_healing_per_min: curve(20, 30),
+      tower_damage: curve(3200, 2600),
+    },
+  }
+}

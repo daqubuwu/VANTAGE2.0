@@ -95,6 +95,25 @@ export interface Benchmark {
   pct: number | null
 }
 
+export type HeroBenchmarkMetric =
+  | 'gold_per_min'
+  | 'xp_per_min'
+  | 'kills_per_min'
+  | 'last_hits_per_min'
+  | 'hero_damage_per_min'
+  | 'hero_healing_per_min'
+  | 'tower_damage'
+
+export interface HeroBenchmarkPoint {
+  percentile: number
+  value: number
+}
+
+export interface HeroBenchmarkResponse {
+  hero_id: number
+  result: Record<HeroBenchmarkMetric, HeroBenchmarkPoint[]>
+}
+
 export interface MatchPlayer {
   account_id: number | null
   player_slot: number

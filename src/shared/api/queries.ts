@@ -4,6 +4,7 @@ import { stratzAvailable } from './stratz'
 import { freshness } from '@/shared/cache/freshness'
 import type {
   Hero,
+  HeroBenchmarkResponse,
   HeroStat,
   Match,
   PlayerHeroRow,
@@ -142,6 +143,15 @@ export function useProMatches() {
     queryKey: ['proMatches'],
     queryFn: () => openDota.proMatches() as Promise<unknown[]>,
     ...options('proScene'),
+  })
+}
+
+export function useHeroBenchmark(heroId: number | undefined) {
+  return useQuery({
+    queryKey: ['heroBenchmark', heroId],
+    queryFn: () => openDota.benchmarks(heroId as number) as Promise<HeroBenchmarkResponse>,
+    enabled: heroId !== undefined && Number.isFinite(heroId),
+    ...options('meta'),
   })
 }
 

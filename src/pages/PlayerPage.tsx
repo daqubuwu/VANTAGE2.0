@@ -15,6 +15,7 @@ import { StatStrip } from '@/features/player/StatStrip'
 import { ActivityGraph } from '@/features/player/ActivityGraph'
 import { MatchList, LoadMore } from '@/features/player/MatchList'
 import { TopHeroes } from '@/features/player/TopHeroes'
+import { HeroBenchmarks } from '@/features/player/HeroBenchmarks'
 import { Tabs } from '@/features/player/Tabs'
 import { usePlayerStats } from '@/features/player/usePlayerStats'
 import { periodLabel } from '@/features/player/period'
@@ -150,10 +151,57 @@ export function PlayerPage() {
                       />
                     ),
                   },
-                  { label: 'GPM', value: num(stats.avgGpm), sub: 'золото в минуту', tone: 'gold' },
-                  { label: 'XPM', value: num(stats.avgXpm), sub: 'опыт в минуту', tone: 'xp' },
-                  { label: 'Урон', value: compact(stats.avgHeroDamage), sub: 'по героям за матч', tone: 'dmg' },
-                  { label: 'Длительность', value: duration(stats.avgDuration), sub: 'средний матч' },
+                  {
+                    label: 'GPM',
+                    value: num(stats.avgGpm),
+                    sub: 'золото в минуту',
+                    tone: 'gold',
+                    explain: (
+                      <MathTooltip
+                        formula="среднее золото в минуту по матчам периода"
+                        inputs={[{ label: 'Матчей учтено', value: String(stats.games) }]}
+                        note={`Период: ${periodLabel(period)}.`}
+                      />
+                    ),
+                  },
+                  {
+                    label: 'XPM',
+                    value: num(stats.avgXpm),
+                    sub: 'опыт в минуту',
+                    tone: 'xp',
+                    explain: (
+                      <MathTooltip
+                        formula="средний опыт в минуту по матчам периода"
+                        inputs={[{ label: 'Матчей учтено', value: String(stats.games) }]}
+                        note={`Период: ${periodLabel(period)}.`}
+                      />
+                    ),
+                  },
+                  {
+                    label: 'Урон',
+                    value: compact(stats.avgHeroDamage),
+                    sub: 'по героям за матч',
+                    tone: 'dmg',
+                    explain: (
+                      <MathTooltip
+                        formula="средний урон по героям за матч"
+                        inputs={[{ label: 'Матчей учтено', value: String(stats.games) }]}
+                        note={`Период: ${periodLabel(period)}. Итог по матчу, не по минутам.`}
+                      />
+                    ),
+                  },
+                  {
+                    label: 'Длительность',
+                    value: duration(stats.avgDuration),
+                    sub: 'средний матч',
+                    explain: (
+                      <MathTooltip
+                        formula="среднее время матча по периоду"
+                        inputs={[{ label: 'Матчей учтено', value: String(stats.games) }]}
+                        note={`Период: ${periodLabel(period)}.`}
+                      />
+                    ),
+                  },
                 ]}
               />
             </Section>
@@ -189,6 +237,15 @@ export function PlayerPage() {
               rows={playerHeroes.data ?? []}
               heroes={heroes.data}
               loading={playerHeroes.isPending}
+            />
+          </Section>
+
+          <Section title="Против медианы" aside="OpenDota, от 5 игр на герое">
+            <HeroBenchmarks
+              playerHeroes={playerHeroes.data ?? []}
+              matches={all}
+              heroes={heroes.data}
+              loading={playerHeroes.isPending || history.isPending}
             />
           </Section>
         </div>

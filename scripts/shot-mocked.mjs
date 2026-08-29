@@ -1,5 +1,5 @@
 import { chromium } from 'playwright'
-import { heroes, player, matches, playerHeroes, peers } from './fixtures.mjs'
+import { heroes, player, matches, playerHeroes, peers, benchmarks } from './fixtures.mjs'
 
 const path = process.argv[2] ?? '/player/898936527'
 const out = process.argv[3] ?? '/tmp/shot.png'
@@ -46,6 +46,7 @@ await page.route('**://api.opendota.com/api/**', (route) => {
     return json(offset >= 60 ? [] : matches(limit, offset))
   }
   if (p === '/search') return json([])
+  if (p === '/benchmarks') return json(benchmarks(Number(url.searchParams.get('hero_id') ?? 0)))
   return json([])
 })
 
