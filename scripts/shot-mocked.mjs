@@ -1,5 +1,23 @@
 import { chromium } from 'playwright'
-import { heroes, player, matches, playerHeroes, peers, benchmarks, totals, stratzRoleMatches } from './fixtures.mjs'
+import {
+  heroes,
+  player,
+  matches,
+  playerHeroes,
+  peers,
+  benchmarks,
+  totals,
+  stratzRoleMatches,
+  match,
+  items,
+  abilityIds,
+  abilities,
+  heroAbilities,
+  heroStats,
+  heroMatchups,
+  heroDurations,
+  heroItemPopularity,
+} from './fixtures.mjs'
 
 const path = process.argv[2] ?? '/player/898936527'
 const out = process.argv[3] ?? '/tmp/shot.png'
@@ -51,6 +69,15 @@ await page.route('**://api.opendota.com/api/**', (route) => {
     const heroId = url.searchParams.get('hero_id')
     return json(totals(heroId ? Number(heroId) : undefined))
   }
+  if (/^\/matches\/\d+$/.test(p)) return json(match(Number(p.split('/')[2])))
+  if (p === '/constants/items') return json(items)
+  if (p === '/constants/ability_ids') return json(abilityIds)
+  if (p === '/constants/abilities') return json(abilities)
+  if (p === '/constants/hero_abilities') return json(heroAbilities)
+  if (p === '/heroStats') return json(heroStats)
+  if (/^\/heroes\/\d+\/matchups$/.test(p)) return json(heroMatchups(Number(p.split('/')[2])))
+  if (/^\/heroes\/\d+\/durations$/.test(p)) return json(heroDurations(Number(p.split('/')[2])))
+  if (/^\/heroes\/\d+\/itemPopularity$/.test(p)) return json(heroItemPopularity(Number(p.split('/')[2])))
   return json([])
 })
 

@@ -70,6 +70,25 @@ export interface PlayerMatch {
   party_size: number | null
 }
 
+export interface HeroMatchup {
+  hero_id: number
+  games_played: number
+  wins: number
+}
+
+export interface HeroDurationBucket {
+  duration_bin: number
+  games_played: number
+  wins: number
+}
+
+export interface HeroItemPopularity {
+  start_game_items?: Record<string, number>
+  early_game_items?: Record<string, number>
+  mid_game_items?: Record<string, number>
+  late_game_items?: Record<string, number>
+}
+
 export interface PlayerHeroRow {
   hero_id: string
   games: number

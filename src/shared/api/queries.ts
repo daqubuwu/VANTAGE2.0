@@ -1,10 +1,13 @@
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { openDota } from './opendota'
 import { stratzAvailable, stratzPlayerRoleMatches } from './stratz'
 import { freshness } from '@/shared/cache/freshness'
 import type {
   Hero,
   HeroBenchmarkResponse,
+  HeroDurationBucket,
+  HeroItemPopularity,
+  HeroMatchup,
   HeroStat,
   Match,
   PlayerHeroRow,
@@ -16,7 +19,7 @@ import type {
   StratzRoleMatch,
 } from './types'
 
-const ROLE_SPLIT_TAKE = 200
+const ROLE_SPLIT_TAKE = 100
 
 const MATCHES_PAGE = 20
 
@@ -136,6 +139,53 @@ export function useMatch(matchId: number | undefined) {
   })
 }
 
+export function useRequestParse(matchId: number | undefined) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => openDota.requestParse(matchId as number),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['match', matchId] })
+    },
+  })
+}
+
+export function useAbilityIds() {
+  return useQuery({
+    queryKey: ['constants', 'ability_ids'],
+    queryFn: () => openDota.constants('ability_ids') as Promise<Record<string, string>>,
+    ...options('constants'),
+  })
+}
+
+export interface AbilityConstant {
+  dname?: string
+  img?: string
+  attrib?: { header?: string; value?: string | string[] }[]
+}
+
+export function useAbilityConstants() {
+  return useQuery({
+    queryKey: ['constants', 'abilities'],
+    queryFn: () => openDota.constants('abilities') as Promise<Record<string, AbilityConstant>>,
+    ...options('constants'),
+  })
+}
+
+export interface HeroAbilityConstant {
+  abilities: string[]
+  talents: { name: string; level: number }[]
+}
+
+export function useHeroAbilityConstants() {
+  return useQuery({
+    queryKey: ['constants', 'hero_abilities'],
+    queryFn: () =>
+      openDota.constants('hero_abilities') as Promise<Record<string, HeroAbilityConstant>>,
+    ...options('constants'),
+    select: (byName) => new Map(Object.entries(byName)),
+  })
+}
+
 export function useSearch(query: string) {
   const trimmed = query.trim()
   return useQuery({
@@ -183,6 +233,33 @@ export function usePlayerRoleMatches(accountId: number | undefined, days: number
     },
     enabled: stratzOk && accountId !== undefined && Number.isFinite(accountId),
     ...options('playerMatches'),
+  })
+}
+
+export function useHeroMatchups(heroId: number | undefined) {
+  return useQuery({
+    queryKey: ['hero', heroId, 'matchups'],
+    queryFn: () => openDota.heroMatchups(heroId as number) as Promise<HeroMatchup[]>,
+    enabled: heroId !== undefined && Number.isFinite(heroId),
+    ...options('meta'),
+  })
+}
+
+export function useHeroDurations(heroId: number | undefined) {
+  return useQuery({
+    queryKey: ['hero', heroId, 'durations'],
+    queryFn: () => openDota.heroDurations(heroId as number) as Promise<HeroDurationBucket[]>,
+    enabled: heroId !== undefined && Number.isFinite(heroId),
+    ...options('meta'),
+  })
+}
+
+export function useHeroItemPopularity(heroId: number | undefined) {
+  return useQuery({
+    queryKey: ['hero', heroId, 'itemPopularity'],
+    queryFn: () => openDota.heroItemPopularity(heroId as number) as Promise<HeroItemPopularity>,
+    enabled: heroId !== undefined && Number.isFinite(heroId),
+    ...options('meta'),
   })
 }
 
