@@ -2,7 +2,7 @@
 
 Аналитика Dota 2. Личный инструмент, русский интерфейс, тёмная тема.
 
-Документация проекта: [`docs/CONTEXT.md`](docs/CONTEXT.md) (читать первым), [`CLAUDE.md`](CLAUDE.md), [`docs/PLAN.md`](docs/PLAN.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/DESIGN.md`](docs/DESIGN.md), [`docs/FEATURES.md`](docs/FEATURES.md).
+Документация проекта: [`CLAUDE.md`](CLAUDE.md), [`docs/PLAN.md`](docs/PLAN.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/DESIGN.md`](docs/DESIGN.md), [`docs/FEATURES.md`](docs/FEATURES.md).
 
 ## Запуск
 
