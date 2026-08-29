@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Tooltip } from './Tooltip'
 
-interface StatProps {
+export interface StripCell {
   label: string
   value: ReactNode
   sub?: ReactNode
@@ -9,7 +9,7 @@ interface StatProps {
   explain?: ReactNode
 }
 
-const TONE: Record<NonNullable<StatProps['tone']>, string> = {
+const TONE: Record<NonNullable<StripCell['tone']>, string> = {
   neutral: 'text-ink',
   win: 'text-win',
   loss: 'text-loss',
@@ -20,13 +20,13 @@ const TONE: Record<NonNullable<StatProps['tone']>, string> = {
   vision: 'text-vision',
 }
 
-export function Stat({ label, value, sub, tone = 'neutral', explain }: StatProps) {
+export function Stat({ label, value, sub, tone = 'neutral', explain }: StripCell) {
   const valueNode = (
-    <span className={`num text-[19px] leading-none font-medium ${TONE[tone]}`}>{value}</span>
+    <span className={`num text-[22px] leading-none font-semibold ${TONE[tone]}`}>{value}</span>
   )
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1.5">
       <span className="text-[11px] text-ink-3">{label}</span>
       {explain ? (
         <Tooltip content={explain} variant="math">

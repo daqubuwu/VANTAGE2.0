@@ -23,7 +23,7 @@ import { Section } from '@/shared/ui/Surface'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { ErrorState } from '@/shared/ui/States'
 import { MathTooltip } from '@/shared/ui/Tooltip'
-import { dec, num, pct, plural } from '@/shared/lib/format'
+import { compact, dec, duration, num, pct, plural } from '@/shared/lib/format'
 
 const OVERVIEW_MATCHES = 20
 
@@ -66,8 +66,11 @@ export function PlayerPage() {
     )
   }
 
-  const hours = stats.totalDuration / 3600
   const deathsPerMatch = stats.avgDeaths
+  const formCaption =
+    stats.games > 0
+      ? `${num(stats.games)} ${plural(stats.games, 'матч', 'матча', 'матчей')} ${periodLabel(period)}`
+      : `нет матчей ${periodLabel(period)}`
 
   return (
     <div className="flex flex-col gap-6">
@@ -88,56 +91,68 @@ export function PlayerPage() {
           <PeriodFilter value={period} onChange={setPeriod} />
 
           {history.isPending ? (
-            <Skeleton className="h-[118px] w-full rounded-panel" />
+            <div className="flex flex-col gap-4">
+              <div className="flex items-baseline justify-between gap-4">
+                <h2 className="text-[16px] font-semibold text-ink">Форма</h2>
+                <Skeleton className="h-3 w-32" />
+              </div>
+              <div className="flex flex-wrap gap-x-9 gap-y-4">
+                {Array.from({ length: 6 }, (_, i) => (
+                  <div key={i} className="flex flex-col gap-1.5">
+                    <Skeleton className="h-2.5 w-12" />
+                    <Skeleton className="h-[22px] w-16" />
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : history.isError ? (
             <ErrorState
               message={history.error instanceof Error ? history.error.message : 'Неизвестная ошибка'}
               onRetry={() => void history.refetch()}
             />
           ) : (
-            <StatStrip
-              cells={[
-                {
-                  label: 'Винрейт',
-                  value: pct(stats.winrate, 1),
-                  sub: `${stats.wins} и ${stats.games - stats.wins}`,
-                  tone: (stats.winrate ?? 0) >= 0.5 ? 'win' : 'loss',
-                  explain: (
-                    <MathTooltip
-                      formula="победы / матчи с известным исходом"
-                      inputs={[
-                        { label: 'Побед', value: String(stats.wins) },
-                        { label: 'Поражений', value: String(stats.games - stats.wins) },
-                      ]}
-                      note={`Период: ${periodLabel(period)}.`}
-                    />
-                  ),
-                },
-                {
-                  label: 'Матчей',
-                  value: num(stats.games),
-                  sub: `${num(hours)} ${plural(Math.round(hours), 'час', 'часа', 'часов')}`,
-                },
-                {
-                  label: 'KDA',
-                  value: dec(stats.avgKda, 2),
-                  sub: `${dec(deathsPerMatch, 1)} смертей за матч`,
-                  explain: (
-                    <MathTooltip
-                      formula="(убийства + помощи) / смерти"
-                      inputs={[
-                        { label: 'Убийств в среднем', value: dec(stats.avgKills, 2) },
-                        { label: 'Смертей в среднем', value: dec(stats.avgDeaths, 2) },
-                        { label: 'Помощей в среднем', value: dec(stats.avgAssists, 2) },
-                      ]}
-                      note="Знаменатель не опускается ниже единицы."
-                    />
-                  ),
-                },
-                { label: 'GPM', value: num(stats.avgGpm), sub: 'золото в минуту', tone: 'gold' },
-                { label: 'XPM', value: num(stats.avgXpm), sub: 'опыт в минуту', tone: 'xp' },
-              ]}
-            />
+            <Section title="Форма" aside={formCaption}>
+              <StatStrip
+                cells={[
+                  {
+                    label: 'Винрейт',
+                    value: pct(stats.winrate, 1),
+                    sub: `${stats.wins} и ${stats.games - stats.wins}`,
+                    tone: (stats.winrate ?? 0) >= 0.5 ? 'win' : 'loss',
+                    explain: (
+                      <MathTooltip
+                        formula="победы / матчи с известным исходом"
+                        inputs={[
+                          { label: 'Побед', value: String(stats.wins) },
+                          { label: 'Поражений', value: String(stats.games - stats.wins) },
+                        ]}
+                        note={`Период: ${periodLabel(period)}.`}
+                      />
+                    ),
+                  },
+                  {
+                    label: 'KDA',
+                    value: dec(stats.avgKda, 2),
+                    sub: `${dec(deathsPerMatch, 1)} смертей за матч`,
+                    explain: (
+                      <MathTooltip
+                        formula="(убийства + помощи) / смерти"
+                        inputs={[
+                          { label: 'Убийств в среднем', value: dec(stats.avgKills, 2) },
+                          { label: 'Смертей в среднем', value: dec(stats.avgDeaths, 2) },
+                          { label: 'Помощей в среднем', value: dec(stats.avgAssists, 2) },
+                        ]}
+                        note="Знаменатель не опускается ниже единицы."
+                      />
+                    ),
+                  },
+                  { label: 'GPM', value: num(stats.avgGpm), sub: 'золото в минуту', tone: 'gold' },
+                  { label: 'XPM', value: num(stats.avgXpm), sub: 'опыт в минуту', tone: 'xp' },
+                  { label: 'Урон', value: compact(stats.avgHeroDamage), sub: 'по героям за матч', tone: 'dmg' },
+                  { label: 'Длительность', value: duration(stats.avgDuration), sub: 'средний матч' },
+                ]}
+              />
+            </Section>
           )}
 
           {history.isPending ? (

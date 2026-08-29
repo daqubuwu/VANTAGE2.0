@@ -1,5 +1,6 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
 import { openDota } from './opendota'
+import { stratzAvailable } from './stratz'
 import { freshness } from '@/shared/cache/freshness'
 import type {
   Hero,
@@ -141,5 +142,15 @@ export function useProMatches() {
     queryKey: ['proMatches'],
     queryFn: () => openDota.proMatches() as Promise<unknown[]>,
     ...options('proScene'),
+  })
+}
+
+export function useStratzStatus() {
+  return useQuery({
+    queryKey: ['stratz', 'status'],
+    queryFn: stratzAvailable,
+    retry: false,
+    refetchInterval: freshness.stratzStatus.staleTime,
+    ...options('stratzStatus'),
   })
 }

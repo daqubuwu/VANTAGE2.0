@@ -12,6 +12,7 @@ export const freshness = {
   meta: { staleTime: 12 * HOUR, gcTime: 3 * DAY, persist: true },
   constants: { staleTime: 7 * DAY, gcTime: 30 * DAY, persist: true },
   proScene: { staleTime: 30 * MINUTE, gcTime: 3 * DAY, persist: true },
+  stratzStatus: { staleTime: 4 * MINUTE, gcTime: 10 * MINUTE, persist: false },
 } as const
 
 export type FreshnessKey = keyof typeof freshness

@@ -1,8 +1,10 @@
 import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { MagnifyingGlass, UserCircle } from '@phosphor-icons/react'
+import { MagnifyingGlass, UserCircle, WifiHigh, WifiSlash } from '@phosphor-icons/react'
 import { DEFAULT_STEAM_ID } from '@/shared/lib/config'
+import { useStratzStatus } from '@/shared/api/queries'
+import { Tooltip } from '@/shared/ui/Tooltip'
 
 const NAV = [
   { to: '/heroes', label: 'Герои' },
@@ -60,6 +62,7 @@ function Header() {
           ))}
         </nav>
         <SearchField />
+        <StratzStatus />
         <NavLink
           to={`/player/${DEFAULT_STEAM_ID}`}
           className="flex items-center gap-2 rounded-full border border-line-2 bg-surface px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:border-accent/40 hover:text-ink"
@@ -101,6 +104,32 @@ function SearchField() {
         className="h-9 w-[248px] rounded-full border border-line-2 bg-surface pl-9 pr-3 text-[13px] text-ink placeholder:text-ink-3 transition-colors focus:border-accent/50 focus:outline-none"
       />
     </form>
+  )
+}
+
+function StratzStatus() {
+  const status = useStratzStatus()
+
+  if (status.isPending) return null
+
+  const online = status.data === true
+
+  return (
+    <Tooltip
+      content={
+        online
+          ? 'Stratz отвечает, расширенные данные доступны'
+          : 'Stratz не отвечает, часть данных недоступна'
+      }
+      variant="hint"
+    >
+      <span
+        className={`hidden items-center gap-1.5 text-[12px] lg:flex ${online ? 'text-ink-3' : 'text-warm'}`}
+      >
+        {online ? <WifiHigh size={14} /> : <WifiSlash size={14} />}
+        Stratz
+      </span>
+    </Tooltip>
   )
 }
 
