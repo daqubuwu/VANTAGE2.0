@@ -85,6 +85,21 @@ export const playerHeroes = HERO_NAMES.map(([id]) => {
 
 export const peers = []
 
+const STRATZ_POSITIONS = ['POSITION_1', 'POSITION_2', 'POSITION_3', 'POSITION_4', 'POSITION_5']
+
+export function stratzRoleMatches(count = 60) {
+  return Array.from({ length: count }, () => ({
+    position: STRATZ_POSITIONS[Math.floor(rnd() * STRATZ_POSITIONS.length)],
+    isVictory: rnd() > 0.45,
+    goldPerMinute: 350 + Math.floor(rnd() * 400),
+    experiencePerMinute: 400 + Math.floor(rnd() * 450),
+    heroDamage: 12000 + Math.floor(rnd() * 40000),
+    kills: Math.floor(rnd() * 18),
+    deaths: Math.floor(rnd() * 12),
+    assists: Math.floor(rnd() * 25),
+  }))
+}
+
 export function totals(heroId) {
   if (heroId !== undefined) {
     return [

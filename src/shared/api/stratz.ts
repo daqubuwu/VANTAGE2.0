@@ -33,3 +33,49 @@ export async function stratzAvailable(): Promise<boolean> {
     return false
   }
 }
+
+const PLAYER_ROLE_MATCHES_QUERY = `
+  query PlayerRoleMatches($steamAccountId: Long!, $take: Int!, $startDateTime: Long) {
+    player(steamAccountId: $steamAccountId) {
+      matches(request: { take: $take, startDateTime: $startDateTime }) {
+        players(steamAccountId: $steamAccountId) {
+          position
+          isVictory
+          goldPerMinute
+          experiencePerMinute
+          heroDamage
+          kills
+          deaths
+          assists
+        }
+      }
+    }
+  }
+`
+
+interface PlayerRoleMatchesResult {
+  player: {
+    matches: {
+      players: {
+        position: string | null
+        isVictory: boolean | null
+        goldPerMinute: number | null
+        experiencePerMinute: number | null
+        heroDamage: number | null
+        kills: number | null
+        deaths: number | null
+        assists: number | null
+      }[]
+    }[]
+  } | null
+}
+
+export async function stratzPlayerRoleMatches(accountId: number, take: number, startDateTime?: number) {
+  const result = await stratz<PlayerRoleMatchesResult>(PLAYER_ROLE_MATCHES_QUERY, {
+    steamAccountId: accountId,
+    take,
+    startDateTime,
+  })
+  const matches = result.player?.matches ?? []
+  return matches.flatMap((match) => match.players)
+}

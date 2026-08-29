@@ -7,6 +7,7 @@ import {
   usePlayerTotals,
   useHeroes,
   usePlayerHeroes,
+  useStratzStatus,
   HISTORY_SIZE,
 } from '@/shared/api/queries'
 import { useDocumentTitle } from '@/shared/lib/useDocumentTitle'
@@ -18,6 +19,7 @@ import { WinrateTrend } from '@/features/player/WinrateTrend'
 import { MatchList, LoadMore } from '@/features/player/MatchList'
 import { TopHeroes } from '@/features/player/TopHeroes'
 import { HeroBenchmarks } from '@/features/player/HeroBenchmarks'
+import { RoleSplit } from '@/features/player/RoleSplit'
 import { Tabs } from '@/features/player/Tabs'
 import { usePlayerStats } from '@/features/player/usePlayerStats'
 import { totalsCount, totalsMean } from '@/features/player/totals'
@@ -52,6 +54,7 @@ export function PlayerPage() {
   const heroes = useHeroes()
   const playerHeroes = usePlayerHeroes(valid ? accountId : undefined)
   const paged = usePlayerMatches(matchesTabOpened && valid ? accountId : undefined)
+  const stratzStatus = useStratzStatus()
 
   useDocumentTitle(
     profile.data?.profile?.personaname ?? (valid ? `Игрок ${accountId}` : 'Игрок'),
@@ -261,6 +264,10 @@ export function PlayerPage() {
               heroes={heroes.data}
               loading={playerHeroes.isPending}
             />
+          </Section>
+
+          <Section title="По ролям" aside={stratzStatus.data ? `Stratz, ${periodLabel(period)}` : undefined}>
+            <RoleSplit accountId={valid ? accountId : undefined} days={periodDays(period)} stratzOk={stratzStatus.data === true} />
           </Section>
         </div>
       )}

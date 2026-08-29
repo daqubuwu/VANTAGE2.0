@@ -1,6 +1,6 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
 import { openDota } from './opendota'
-import { stratzAvailable } from './stratz'
+import { stratzAvailable, stratzPlayerRoleMatches } from './stratz'
 import { freshness } from '@/shared/cache/freshness'
 import type {
   Hero,
@@ -13,7 +13,10 @@ import type {
   PlayerProfile,
   PlayerTotalsField,
   SearchHit,
+  StratzRoleMatch,
 } from './types'
+
+const ROLE_SPLIT_TAKE = 200
 
 const MATCHES_PAGE = 20
 
@@ -166,6 +169,20 @@ export function useHeroBenchmark(heroId: number | undefined) {
     queryFn: () => openDota.benchmarks(heroId as number) as Promise<HeroBenchmarkResponse>,
     enabled: heroId !== undefined && Number.isFinite(heroId),
     ...options('meta'),
+  })
+}
+
+export function usePlayerRoleMatches(accountId: number | undefined, days: number | null, stratzOk: boolean) {
+  return useQuery({
+    queryKey: ['player', accountId, 'roleMatches', days],
+    queryFn: () => {
+      const startDateTime = days !== null ? Math.floor(Date.now() / 1000 - days * 86400) : undefined
+      return stratzPlayerRoleMatches(accountId as number, ROLE_SPLIT_TAKE, startDateTime) as Promise<
+        StratzRoleMatch[]
+      >
+    },
+    enabled: stratzOk && accountId !== undefined && Number.isFinite(accountId),
+    ...options('playerMatches'),
   })
 }
 

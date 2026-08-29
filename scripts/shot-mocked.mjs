@@ -1,5 +1,5 @@
 import { chromium } from 'playwright'
-import { heroes, player, matches, playerHeroes, peers, benchmarks, totals } from './fixtures.mjs'
+import { heroes, player, matches, playerHeroes, peers, benchmarks, totals, stratzRoleMatches } from './fixtures.mjs'
 
 const path = process.argv[2] ?? '/player/898936527'
 const out = process.argv[3] ?? '/tmp/shot.png'
@@ -52,6 +52,19 @@ await page.route('**://api.opendota.com/api/**', (route) => {
     return json(totals(heroId ? Number(heroId) : undefined))
   }
   return json([])
+})
+
+await page.route('**/api/stratz', (route) => {
+  const body = JSON.parse(route.request().postData() ?? '{}')
+  const query = String(body.query ?? '')
+  const json = (data) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data }) })
+
+  if (query.includes('gameVersions')) return json({ constants: { gameVersions: [{ id: 1 }] } })
+  if (query.includes('PlayerRoleMatches')) {
+    const take = Number(body.variables?.take ?? 60)
+    return json({ player: { matches: stratzRoleMatches(Math.min(take, 60)).map((p) => ({ players: [p] })) } })
+  }
+  return json(null)
 })
 
 await page.goto('http://127.0.0.1:4173' + path, { waitUntil: 'domcontentloaded', timeout: 45000 })

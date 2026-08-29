@@ -12,14 +12,36 @@ function url(path: string, params?: Record<string, string | number | undefined>)
   return u.toString()
 }
 
+interface MatchProjection {
+  match_id: number
+  [field: string]: unknown
+}
+
+async function fetchProjection(id: number, params: Record<string, string | number>, field: string) {
+  const rows = await getJson<MatchProjection[]>(url(`/players/${id}/matches`, { ...params, project: field }))
+  return new Map(rows.map((row) => [row.match_id, row[field]]))
+}
+
+async function matchesWithExtras(id: number, params: Record<string, string | number>) {
+  const [base, gpm, heroDamage] = await Promise.all([
+    getJson<MatchProjection[]>(url(`/players/${id}/matches`, params)),
+    fetchProjection(id, params, 'gold_per_min'),
+    fetchProjection(id, params, 'hero_damage'),
+  ])
+  return base.map((match) => ({
+    ...match,
+    gold_per_min: gpm.get(match.match_id) ?? null,
+    hero_damage: heroDamage.get(match.match_id) ?? null,
+  }))
+}
+
 export const openDota = {
   player: (id: number) => getJson<unknown>(url(`/players/${id}`)),
   playerWinLoss: (id: number, params?: Record<string, string | number>) =>
     getJson<unknown>(url(`/players/${id}/wl`, params)),
   playerMatches: (id: number, limit: number, offset: number) =>
-    getJson<unknown[]>(url(`/players/${id}/matches`, { limit, offset })),
-  playerHistory: (id: number, limit: number) =>
-    getJson<unknown[]>(url(`/players/${id}/matches`, { limit })),
+    matchesWithExtras(id, { limit, offset }),
+  playerHistory: (id: number, limit: number) => matchesWithExtras(id, { limit }),
   playerHeroes: (id: number) => getJson<unknown[]>(url(`/players/${id}/heroes`)),
   playerPeers: (id: number) => getJson<unknown[]>(url(`/players/${id}/peers`)),
   playerTotals: (id: number, params?: Record<string, string | number>) =>

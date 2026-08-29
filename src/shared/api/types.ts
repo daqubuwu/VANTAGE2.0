@@ -90,6 +90,28 @@ export interface PlayerPeer {
   with_win: number
 }
 
+export type StratzPosition =
+  | 'POSITION_1'
+  | 'POSITION_2'
+  | 'POSITION_3'
+  | 'POSITION_4'
+  | 'POSITION_5'
+  | 'UNKNOWN'
+  | 'FILTERED'
+  | 'ALL'
+  | null
+
+export interface StratzRoleMatch {
+  position: StratzPosition
+  isVictory: boolean | null
+  goldPerMinute: number | null
+  experiencePerMinute: number | null
+  heroDamage: number | null
+  kills: number | null
+  deaths: number | null
+  assists: number | null
+}
+
 export interface PlayerTotalsField {
   field: string
   n: number
