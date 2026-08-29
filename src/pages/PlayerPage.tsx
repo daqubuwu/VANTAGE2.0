@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   usePlayer,
@@ -16,8 +16,8 @@ import { ActivityGraph } from '@/features/player/ActivityGraph'
 import { MatchList, LoadMore } from '@/features/player/MatchList'
 import { TopHeroes } from '@/features/player/TopHeroes'
 import { Tabs } from '@/features/player/Tabs'
-import { aggregate } from '@/features/player/aggregate'
-import { withinPeriod, periodLabel } from '@/features/player/period'
+import { usePlayerStats } from '@/features/player/usePlayerStats'
+import { periodLabel } from '@/features/player/period'
 import type { PeriodKey } from '@/features/player/period'
 import { Section } from '@/shared/ui/Surface'
 import { Skeleton } from '@/shared/ui/Skeleton'
@@ -36,20 +36,24 @@ export function PlayerPage() {
 
   const [period, setPeriod] = useState<PeriodKey>('month')
   const [tab, setTab] = useState<TabKey>('overview')
+  const [matchesTabOpened, setMatchesTabOpened] = useState(false)
+
+  useEffect(() => {
+    if (tab === 'matches') setMatchesTabOpened(true)
+  }, [tab])
 
   const profile = usePlayer(valid ? accountId : undefined)
   const history = usePlayerHistory(valid ? accountId : undefined)
-  const paged = usePlayerMatches(valid ? accountId : undefined)
   const heroes = useHeroes()
   const playerHeroes = usePlayerHeroes(valid ? accountId : undefined)
+  const paged = usePlayerMatches(matchesTabOpened && valid ? accountId : undefined)
 
   useDocumentTitle(
     profile.data?.profile?.personaname ?? (valid ? `Игрок ${accountId}` : 'Игрок'),
   )
 
   const all = useMemo(() => history.data ?? [], [history.data])
-  const scoped = useMemo(() => withinPeriod(all, period), [all, period])
-  const stats = useMemo(() => aggregate(scoped), [scoped])
+  const stats = usePlayerStats(all, period)
   const timestamps = useMemo(() => all.map((match) => match.start_time), [all])
   const pagedFlat = useMemo(() => paged.data?.pages.flat() ?? [], [paged.data])
 
@@ -199,7 +203,7 @@ export function PlayerPage() {
             />
           ) : (
             <>
-              <MatchList matches={pagedFlat} heroes={heroes.data} loading={paged.isPending} />
+              <MatchList matches={pagedFlat} heroes={heroes.data} loading={!matchesTabOpened || paged.isPending} />
               <LoadMore
                 hasMore={paged.hasNextPage}
                 loading={paged.isFetchingNextPage}
