@@ -2,7 +2,7 @@ export const config = { runtime: 'edge' }
 
 const UPSTREAM = 'https://api.stratz.com/graphql'
 
-export default async function handler(request: Request): Promise<Response> {
+export default async function handler(request) {
   if (request.method !== 'POST') {
     return json({ errors: [{ message: 'Only POST' }] }, 405)
   }
@@ -12,10 +12,10 @@ export default async function handler(request: Request): Promise<Response> {
     return json({ errors: [{ message: 'STRATZ_API_KEY не задан на сервере' }] }, 500)
   }
 
-  let body: string
+  let body
   try {
     body = await request.text()
-    const parsed = JSON.parse(body) as { query?: unknown }
+    const parsed = JSON.parse(body)
     if (typeof parsed.query !== 'string') {
       return json({ errors: [{ message: 'Ожидается поле query' }] }, 400)
     }
@@ -45,7 +45,7 @@ export default async function handler(request: Request): Promise<Response> {
   })
 }
 
-function json(payload: unknown, status: number) {
+function json(payload, status) {
   return new Response(JSON.stringify(payload), {
     status,
     headers: { 'content-type': 'application/json' },
