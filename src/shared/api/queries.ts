@@ -9,14 +9,20 @@ import type {
   HeroItemPopularity,
   HeroMatchup,
   HeroStat,
+  LiveMatch,
   Match,
   PlayerHeroRow,
   PlayerMatch,
   PlayerPeer,
   PlayerProfile,
   PlayerTotalsField,
+  ProMatch,
   SearchHit,
   StratzRoleMatch,
+  TeamHeroPick,
+  TeamMatch,
+  TeamPlayer,
+  TeamProfile,
 } from './types'
 
 const ROLE_SPLIT_TAKE = 100
@@ -199,7 +205,7 @@ export function useSearch(query: string) {
 export function useLiveMatches() {
   return useQuery({
     queryKey: ['live'],
-    queryFn: () => openDota.live() as Promise<unknown[]>,
+    queryFn: () => openDota.live() as Promise<LiveMatch[]>,
     refetchInterval: freshness.liveMatches.staleTime,
     ...options('liveMatches'),
   })
@@ -208,8 +214,44 @@ export function useLiveMatches() {
 export function useProMatches() {
   return useQuery({
     queryKey: ['proMatches'],
-    queryFn: () => openDota.proMatches() as Promise<unknown[]>,
+    queryFn: () => openDota.proMatches() as Promise<ProMatch[]>,
     ...options('proScene'),
+  })
+}
+
+export function useTeam(teamId: number | undefined) {
+  return useQuery({
+    queryKey: ['team', teamId],
+    queryFn: () => openDota.team(teamId as number) as Promise<TeamProfile>,
+    enabled: teamId !== undefined && Number.isFinite(teamId),
+    ...options('meta'),
+  })
+}
+
+export function useTeamMatches(teamId: number | undefined) {
+  return useQuery({
+    queryKey: ['team', teamId, 'matches'],
+    queryFn: () => openDota.teamMatches(teamId as number) as Promise<TeamMatch[]>,
+    enabled: teamId !== undefined && Number.isFinite(teamId),
+    ...options('meta'),
+  })
+}
+
+export function useTeamPlayers(teamId: number | undefined) {
+  return useQuery({
+    queryKey: ['team', teamId, 'players'],
+    queryFn: () => openDota.teamPlayers(teamId as number) as Promise<TeamPlayer[]>,
+    enabled: teamId !== undefined && Number.isFinite(teamId),
+    ...options('meta'),
+  })
+}
+
+export function useTeamHeroes(teamId: number | undefined) {
+  return useQuery({
+    queryKey: ['team', teamId, 'heroes'],
+    queryFn: () => openDota.teamHeroes(teamId as number) as Promise<TeamHeroPick[]>,
+    enabled: teamId !== undefined && Number.isFinite(teamId),
+    ...options('meta'),
   })
 }
 
@@ -259,6 +301,36 @@ export function useHeroItemPopularity(heroId: number | undefined) {
     queryKey: ['hero', heroId, 'itemPopularity'],
     queryFn: () => openDota.heroItemPopularity(heroId as number) as Promise<HeroItemPopularity>,
     enabled: heroId !== undefined && Number.isFinite(heroId),
+    ...options('meta'),
+  })
+}
+
+export function useHeroMatchupsBatch(heroIds: number[]) {
+  const key = [...new Set(heroIds)].sort((a, b) => a - b)
+  return useQuery({
+    queryKey: ['heroMatchupsBatch', key],
+    queryFn: async () => {
+      const entries = await Promise.all(
+        key.map(async (id) => [id, (await openDota.heroMatchups(id)) as HeroMatchup[]] as const),
+      )
+      return new Map(entries)
+    },
+    enabled: key.length > 0,
+    ...options('meta'),
+  })
+}
+
+export function useHeroDurationsBatch(heroIds: number[]) {
+  const key = [...new Set(heroIds)].sort((a, b) => a - b)
+  return useQuery({
+    queryKey: ['heroDurationsBatch', key],
+    queryFn: async () => {
+      const entries = await Promise.all(
+        key.map(async (id) => [id, (await openDota.heroDurations(id)) as HeroDurationBucket[]] as const),
+      )
+      return new Map(entries)
+    },
+    enabled: key.length > 0,
     ...options('meta'),
   })
 }

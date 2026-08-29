@@ -230,6 +230,67 @@ export interface Match {
   picks_bans: { is_pick: boolean; hero_id: number; team: number; order: number }[] | null
 }
 
+export interface TeamProfile {
+  team_id: number
+  name: string
+  tag: string | null
+  logo_url: string | null
+  rating: number | null
+  wins: number
+  losses: number
+  last_match_time: number | null
+}
+
+export interface TeamMatch {
+  match_id: number
+  duration: number
+  start_time: number
+  radiant: boolean
+  radiant_win: boolean
+  opposing_team_id: number | null
+  opposing_team_name: string | null
+  opposing_team_logo: string | null
+}
+
+export interface TeamPlayer {
+  account_id: number
+  name: string | null
+  games_played: number
+  wins: number
+  is_current_team_member: boolean | null
+}
+
+export interface TeamHeroPick {
+  hero_id: number
+  games_played: number
+  wins: number
+}
+
+export interface ProMatch {
+  match_id: number
+  duration: number
+  start_time: number
+  radiant_team_id: number | null
+  radiant_name: string | null
+  dire_team_id: number | null
+  dire_name: string | null
+  leagueid: number | null
+  league_name: string | null
+  radiant_score: number | null
+  dire_score: number | null
+  radiant_win: boolean | null
+}
+
+export interface LiveMatch {
+  match_id: number
+  duration: number | null
+  radiant_score: number | null
+  dire_score: number | null
+  team_name_radiant: string | null
+  team_name_dire: string | null
+  spectators: number | null
+}
+
 export interface SearchHit {
   account_id: number
   personaname: string | null

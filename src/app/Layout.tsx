@@ -46,13 +46,13 @@ function Header() {
           <Mark />
           VANTAGE
         </Link>
-        <nav className="mr-auto flex gap-1">
+        <nav className="mr-auto flex gap-1 overflow-x-auto">
           {NAV.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `rounded-ctl px-3 py-1.5 text-[14px] transition-colors ${
+                `shrink-0 rounded-ctl px-3 py-1.5 text-[14px] transition-colors ${
                   isActive ? 'bg-accent/12 text-ink' : 'text-ink-2 hover:bg-surface-2 hover:text-ink'
                 }`
               }
@@ -65,10 +65,10 @@ function Header() {
         <StratzStatus />
         <NavLink
           to={`/player/${DEFAULT_STEAM_ID}`}
-          className="flex items-center gap-2 rounded-full border border-line-2 bg-surface px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:border-accent/40 hover:text-ink"
+          className="flex shrink-0 items-center gap-2 rounded-full border border-line-2 bg-surface px-3 py-1.5 text-[13px] text-ink-2 transition-colors hover:border-accent/40 hover:text-ink"
         >
           <UserCircle size={17} />
-          Мой профиль
+          <span className="hidden sm:inline">Мой профиль</span>
         </NavLink>
       </div>
     </header>

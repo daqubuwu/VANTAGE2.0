@@ -67,6 +67,7 @@ export const openDota = {
   team: (id: number) => getJson<unknown>(url(`/teams/${id}`)),
   teamMatches: (id: number) => getJson<unknown[]>(url(`/teams/${id}/matches`)),
   teamPlayers: (id: number) => getJson<unknown[]>(url(`/teams/${id}/players`)),
+  teamHeroes: (id: number) => getJson<unknown[]>(url(`/teams/${id}/heroes`)),
 
   search: (q: string) => getJson<unknown[]>(url('/search', { q })),
   constants: (resource: string) => getJson<unknown>(url(`/constants/${resource}`)),

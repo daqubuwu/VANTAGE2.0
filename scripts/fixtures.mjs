@@ -307,6 +307,84 @@ export function totals(heroId) {
   ]
 }
 
+export const searchHits = [
+  { account_id: 898936527, personaname: 'daqubuwu', avatarfull: null, last_match_time: new Date().toISOString(), similarity: 1 },
+  { account_id: 111222333, personaname: 'rival_player', avatarfull: null, last_match_time: new Date().toISOString(), similarity: 0.8 },
+]
+
+export const team = {
+  team_id: 2586976,
+  name: 'Test Team',
+  tag: 'TT',
+  logo_url: null,
+  rating: 1420,
+  wins: 64,
+  losses: 41,
+  last_match_time: Math.floor(Date.now() / 1000) - 86400,
+}
+
+export function teamMatches() {
+  return Array.from({ length: 15 }, (_, i) => ({
+    match_id: 8_200_000_000 + i,
+    duration: 1800 + Math.floor(rnd() * 2000),
+    start_time: Math.floor(Date.now() / 1000) - i * 86400 * 3,
+    radiant: rnd() > 0.5,
+    radiant_win: rnd() > 0.45,
+    opposing_team_id: 3000000 + i,
+    opposing_team_name: `Opponent ${i + 1}`,
+    opposing_team_logo: null,
+  }))
+}
+
+export function teamPlayers() {
+  return Array.from({ length: 6 }, (_, i) => {
+    const games = 30 + Math.floor(rnd() * 200)
+    return {
+      account_id: 898936527 + i,
+      name: `roster_${i}`,
+      games_played: games,
+      wins: Math.floor(games * (0.4 + rnd() * 0.2)),
+      is_current_team_member: i < 5,
+    }
+  })
+}
+
+export function teamHeroes() {
+  return HERO_NAMES.map(([id]) => {
+    const games = 3 + Math.floor(rnd() * 40)
+    return { hero_id: id, games_played: games, wins: Math.floor(games * (0.35 + rnd() * 0.35)) }
+  })
+}
+
+export function proMatches() {
+  return Array.from({ length: 20 }, (_, i) => ({
+    match_id: 8_300_000_000 + i,
+    duration: 1800 + Math.floor(rnd() * 2200),
+    start_time: Math.floor(Date.now() / 1000) - i * 3600,
+    radiant_team_id: 111 + i,
+    radiant_name: `Radiant Squad ${i}`,
+    dire_team_id: 222 + i,
+    dire_name: `Dire Squad ${i}`,
+    leagueid: 15000 + i,
+    league_name: 'Test League',
+    radiant_score: Math.floor(rnd() * 40),
+    dire_score: Math.floor(rnd() * 40),
+    radiant_win: rnd() > 0.5,
+  }))
+}
+
+export function liveMatches() {
+  return Array.from({ length: 3 }, (_, i) => ({
+    match_id: 8_400_000_000 + i,
+    duration: 600 + i * 400,
+    radiant_score: Math.floor(rnd() * 20),
+    dire_score: Math.floor(rnd() * 20),
+    team_name_radiant: `Radiant Live ${i}`,
+    team_name_dire: `Dire Live ${i}`,
+    spectators: 1000 + i * 500,
+  }))
+}
+
 export function benchmarks(heroId) {
   const curve = (base, spread) =>
     [0.1, 0.25, 0.5, 0.75, 0.9, 0.99].map((percentile) => ({
