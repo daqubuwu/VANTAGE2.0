@@ -15,13 +15,13 @@ export function isHeroTaken(state: DraftState, heroId: number) {
   return state.radiant.includes(heroId) || state.dire.includes(heroId) || state.bans.includes(heroId)
 }
 
-function canAssign(state: DraftState, mode: DraftMode) {
-  if (mode === 'ban') return true
+function canAssign(state: DraftState, mode: DraftMode, banLimit: number | null) {
+  if (mode === 'ban') return banLimit === null || state.bans.length < banLimit
   return state[mode].length < MAX_PICKS
 }
 
-export function assign(state: DraftState, mode: DraftMode, heroId: number): DraftState {
-  if (isHeroTaken(state, heroId) || !canAssign(state, mode)) return state
+export function assign(state: DraftState, mode: DraftMode, heroId: number, banLimit: number | null = null): DraftState {
+  if (isHeroTaken(state, heroId) || !canAssign(state, mode, banLimit)) return state
   if (mode === 'ban') return { ...state, bans: [...state.bans, heroId] }
   return { ...state, [mode]: [...state[mode], heroId] }
 }

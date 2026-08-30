@@ -8,9 +8,10 @@ import { DraftBoard } from '@/features/draft/DraftBoard'
 import { HeroPicker } from '@/features/draft/HeroPicker'
 import { CounterPanel } from '@/features/draft/CounterPanel'
 import { BanSuggestions } from '@/features/draft/BanSuggestions'
+import { BestPickPanel } from '@/features/draft/BestPickPanel'
 import { TimingWindows } from '@/features/draft/TimingWindows'
 import { suggestCounters } from '@/features/draft/counters'
-import { suggestBans } from '@/features/draft/bans'
+import { suggestBestPicks } from '@/features/draft/bestPick'
 import { buildTimingRows } from '@/features/draft/timing'
 import { assign, remove, EMPTY_DRAFT } from '@/features/draft/state'
 import type { DraftMode } from '@/features/draft/state'
@@ -18,12 +19,19 @@ import { BracketFilter } from '@/features/meta/BracketFilter'
 import { buildTierRows } from '@/features/meta/tierlist'
 import type { BracketKey } from '@/features/meta/tierlist'
 
+const BAN_LIMIT_OPTIONS: { key: string; label: string; value: number | null }[] = [
+  { key: 'none', label: 'Без лимита', value: null },
+  { key: 'ten', label: '10 на матч', value: 10 },
+  { key: 'six', label: '6 на матч', value: 6 },
+]
+
 export function DraftPage() {
   useDocumentTitle('Драфт')
 
   const [draft, setDraft] = useState(EMPTY_DRAFT)
   const [mode, setMode] = useState<DraftMode>('radiant')
   const [bracket, setBracket] = useState<BracketKey>('pro')
+  const [banLimitKey, setBanLimitKey] = useState('none')
 
   const heroes = useHeroes()
   const heroStats = useHeroStats()
@@ -33,6 +41,7 @@ export function DraftPage() {
   const durations = useHeroDurationsBatch(pickedIds)
 
   const takenIds = useMemo(() => new Set([...draft.radiant, ...draft.dire, ...draft.bans]), [draft])
+  const banLimit = BAN_LIMIT_OPTIONS.find((option) => option.key === banLimitKey)?.value ?? null
 
   const radiantCounters = useMemo(
     () => suggestCounters(draft.dire, matchups.data, takenIds, heroes.data),
@@ -44,7 +53,15 @@ export function DraftPage() {
   )
 
   const tierRows = useMemo(() => buildTierRows(heroStats.data, bracket), [heroStats.data, bracket])
-  const banRows = useMemo(() => suggestBans(tierRows, takenIds), [tierRows, takenIds])
+
+  const radiantBestPicks = useMemo(
+    () => suggestBestPicks(draft.radiant, draft.dire, matchups.data, tierRows, takenIds, heroes.data),
+    [draft.radiant, draft.dire, matchups.data, tierRows, takenIds, heroes.data],
+  )
+  const direBestPicks = useMemo(
+    () => suggestBestPicks(draft.dire, draft.radiant, matchups.data, tierRows, takenIds, heroes.data),
+    [draft.dire, draft.radiant, matchups.data, tierRows, takenIds, heroes.data],
+  )
 
   const timingRows = useMemo(
     () => buildTimingRows(draft.radiant, draft.dire, durations.data),
@@ -53,6 +70,10 @@ export function DraftPage() {
 
   function handleRemove(slotMode: DraftMode, heroId: number) {
     setDraft((prev) => remove(prev, slotMode, heroId))
+  }
+
+  function handleAssign(slotMode: DraftMode, heroId: number) {
+    setDraft((prev) => assign(prev, slotMode, heroId, banLimit))
   }
 
   return (
@@ -74,32 +95,62 @@ export function DraftPage() {
           <HeroPicker
             heroes={heroes.data}
             takenIds={takenIds}
-            onPick={(heroId) => setDraft((prev) => assign(prev, mode, heroId))}
+            onPick={(heroId) => handleAssign(mode, heroId)}
           />
         )}
       </Section>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Section title="Рекомендации для Radiant" aside="контрпик по среднему винрейту врага">
+        <Section title="Лучший пик для Radiant" aside="контрпик + мета + недостающая роль в команде">
+          <BestPickPanel rows={radiantBestPicks} heroes={heroes.data} onPick={(heroId) => handleAssign('radiant', heroId)} />
+        </Section>
+        <Section title="Лучший пик для Dire" aside="контрпик + мета + недостающая роль в команде">
+          <BestPickPanel rows={direBestPicks} heroes={heroes.data} onPick={(heroId) => handleAssign('dire', heroId)} />
+        </Section>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Section title="Контрпики для Radiant" aside="средний винрейт врага против героя">
           <CounterPanel
             title="Против пиков Dire"
             rows={radiantCounters}
             heroes={heroes.data}
-            onPick={(heroId) => setDraft((prev) => assign(prev, 'radiant', heroId))}
+            onPick={(heroId) => handleAssign('radiant', heroId)}
           />
         </Section>
-        <Section title="Рекомендации для Dire" aside="контрпик по среднему винрейту врага">
+        <Section title="Контрпики для Dire" aside="средний винрейт врага против героя">
           <CounterPanel
             title="Против пиков Radiant"
             rows={direCounters}
             heroes={heroes.data}
-            onPick={(heroId) => setDraft((prev) => assign(prev, 'dire', heroId))}
+            onPick={(heroId) => handleAssign('dire', heroId)}
           />
         </Section>
       </div>
 
       <Section title="Кого банить">
-        <BracketFilter value={bracket} onChange={setBracket} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <BracketFilter value={bracket} onChange={setBracket} />
+          <label className="flex items-center gap-2 text-[12px] text-ink-3">
+            Лимит банов
+            <select
+              value={banLimitKey}
+              onChange={(event) => setBanLimitKey(event.target.value)}
+              className="h-8 rounded-full border border-line-2 bg-surface px-3 text-[12px] text-ink focus:border-accent/50 focus:outline-none"
+            >
+              {BAN_LIMIT_OPTIONS.map((option) => (
+                <option key={option.key} value={option.key}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <p className="text-[11px] text-ink-3">
+          {draft.bans.length}
+          {banLimit !== null && ` / ${banLimit}`} забанено · лимит банов отличается по режиму и патчу, поэтому
+          выставляется вручную, а не зашит в код
+        </p>
         {heroStats.isPending ? (
           <SkeletonRows rows={5} height={40} />
         ) : heroStats.isError ? (
@@ -109,9 +160,10 @@ export function DraftPage() {
           />
         ) : (
           <BanSuggestions
-            rows={banRows}
+            tierRows={tierRows}
+            excludeIds={takenIds}
             heroes={heroes.data}
-            onPick={(heroId) => setDraft((prev) => assign(prev, 'ban', heroId))}
+            onPick={(heroId) => handleAssign('ban', heroId)}
           />
         )}
       </Section>
