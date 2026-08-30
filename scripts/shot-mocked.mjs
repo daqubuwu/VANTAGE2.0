@@ -103,14 +103,25 @@ await page.route('**/api/stratz', (route) => {
   if (query.includes('gameVersions')) return json({ constants: { gameVersions: [{ id: 1 }] } })
   if (query.includes('PlayerRoleMatches')) {
     const take = Number(body.variables?.take ?? 60)
-    return json({ player: { matches: stratzRoleMatches(Math.min(take, 60)).map((p) => ({ players: [p] })) } })
+    return json({
+      player: {
+        matches: stratzRoleMatches(Math.min(take, 60)).map((p) => ({ id: p.matchId, players: [p] })),
+      },
+    })
   }
   return json(null)
 })
 
 await page.goto('http://127.0.0.1:4173' + path, { waitUntil: 'domcontentloaded', timeout: 45000 })
 await page.waitForTimeout(2200)
-await page.screenshot({ path: out })
+
+const clickText = process.argv[6]
+if (clickText) {
+  await page.getByRole('tab', { name: clickText }).click()
+  await page.waitForTimeout(1200)
+}
+
+await page.screenshot({ path: out, fullPage: Boolean(clickText) })
 
 console.log('url:', page.url())
 console.log('title:', await page.title())

@@ -4,6 +4,7 @@ import { isRadiantSlot } from '@/shared/api/types'
 import { HeroIcon } from '@/shared/ui/HeroIcon'
 import { ago, compact, dec, duration, kda, num } from '@/shared/lib/format'
 import { Tooltip } from '@/shared/ui/Tooltip'
+import type { MatchPosition } from './matchPositions'
 
 const GAME_MODE: Record<number, string> = {
   1: 'Все случайные',
@@ -19,9 +20,10 @@ const GAME_MODE: Record<number, string> = {
 interface MatchRowProps {
   match: PlayerMatch
   hero: Hero | undefined
+  position?: MatchPosition
 }
 
-export function MatchRow({ match, hero }: MatchRowProps) {
+export function MatchRow({ match, hero, position }: MatchRowProps) {
   const radiant = isRadiantSlot(match.player_slot)
   const win = match.radiant_win === null ? null : match.radiant_win === radiant
   const ratio = kda(match.kills, match.deaths, match.assists)
@@ -46,7 +48,16 @@ export function MatchRow({ match, hero }: MatchRowProps) {
       />
 
       <span className="flex min-w-0 items-center gap-3">
-        <HeroIcon hero={hero} size={30} link={false} />
+        <span className="relative shrink-0">
+          <HeroIcon hero={hero} size={30} link={false} />
+          {position && (
+            <Tooltip content={position.label} variant="hint">
+              <span className="num absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-line bg-surface text-[9px] font-semibold text-ink-2">
+                {position.number ?? '?'}
+              </span>
+            </Tooltip>
+          )}
+        </span>
         <span className="flex min-w-0 flex-col">
           <span className="truncate text-[14px] text-ink">{hero?.localized_name ?? '—'}</span>
           <span className="truncate text-[11px] text-ink-3">

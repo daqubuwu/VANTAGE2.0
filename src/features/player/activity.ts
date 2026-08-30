@@ -1,9 +1,16 @@
 export const ACTIVITY_WEEKS = 53
 
+export interface ActivityMatch {
+  time: number
+  win: boolean | null
+}
+
 export interface ActivityCell {
   date: Date
   key: string
   count: number
+  wins: number
+  losses: number
   future: boolean
 }
 
@@ -32,16 +39,20 @@ export function dateKey(date: Date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
 }
 
-export function buildActivity(timestamps: number[], now = new Date()): ActivityGrid {
+export function buildActivity(matches: ActivityMatch[], now = new Date()): ActivityGrid {
   const today = startOfDay(now)
   const gridStart = mondayOf(new Date(today.getTime() - (ACTIVITY_WEEKS * 7 - 1) * 86400000))
 
-  const counts = new Map<string, number>()
-  for (const ts of timestamps) {
-    const day = startOfDay(new Date(ts * 1000))
+  const counts = new Map<string, { count: number; wins: number; losses: number }>()
+  for (const match of matches) {
+    const day = startOfDay(new Date(match.time * 1000))
     if (day < gridStart || day > today) continue
     const key = dateKey(day)
-    counts.set(key, (counts.get(key) ?? 0) + 1)
+    const entry = counts.get(key) ?? { count: 0, wins: 0, losses: 0 }
+    entry.count += 1
+    if (match.win === true) entry.wins += 1
+    else if (match.win === false) entry.losses += 1
+    counts.set(key, entry)
   }
 
   const weeks: ActivityCell[][] = []
@@ -53,10 +64,13 @@ export function buildActivity(timestamps: number[], now = new Date()): ActivityG
     for (let d = 0; d < 7; d += 1) {
       const date = new Date(gridStart.getTime() + (w * 7 + d) * 86400000)
       const key = dateKey(date)
+      const entry = counts.get(key)
       cells.push({
         date,
         key,
-        count: counts.get(key) ?? 0,
+        count: entry?.count ?? 0,
+        wins: entry?.wins ?? 0,
+        losses: entry?.losses ?? 0,
         future: date > today,
       })
     }
@@ -71,20 +85,20 @@ export function buildActivity(timestamps: number[], now = new Date()): ActivityG
   let total = 0
   let activeDays = 0
   let max = 0
-  for (const count of counts.values()) {
-    total += count
-    if (count > 0) activeDays += 1
-    if (count > max) max = count
+  for (const entry of counts.values()) {
+    total += entry.count
+    if (entry.count > 0) activeDays += 1
+    if (entry.count > max) max = entry.count
   }
 
   return { weeks, monthMarks, total, activeDays, max: Math.max(1, max) }
 }
 
-export function activityLevel(count: number, max: number) {
+export function activityIntensity(count: number, max: number) {
   if (count === 0) return 0
   const ratio = count / max
-  if (ratio > 0.66) return 4
-  if (ratio > 0.33) return 3
-  if (ratio > 0.15) return 2
-  return 1
+  if (ratio > 0.66) return 1
+  if (ratio > 0.33) return 0.75
+  if (ratio > 0.15) return 0.55
+  return 0.35
 }

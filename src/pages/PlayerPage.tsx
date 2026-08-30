@@ -8,6 +8,7 @@ import {
   useHeroes,
   usePlayerHeroes,
   useStratzStatus,
+  usePlayerRoleMatches,
   HISTORY_SIZE,
 } from '@/shared/api/queries'
 import { useDocumentTitle } from '@/shared/lib/useDocumentTitle'
@@ -17,6 +18,7 @@ import { StatStrip } from '@/features/player/StatStrip'
 import { ActivityGraph } from '@/features/player/ActivityGraph'
 import { WinrateTrend } from '@/features/player/WinrateTrend'
 import { MatchList, LoadMore } from '@/features/player/MatchList'
+import { MatchFilters } from '@/features/player/MatchFilters'
 import { TopHeroes } from '@/features/player/TopHeroes'
 import { HeroBenchmarks } from '@/features/player/HeroBenchmarks'
 import { RoleSplit } from '@/features/player/RoleSplit'
@@ -25,11 +27,14 @@ import { usePlayerStats } from '@/features/player/usePlayerStats'
 import { totalsCount, totalsMean } from '@/features/player/totals'
 import { periodDays, periodLabel } from '@/features/player/period'
 import type { PeriodKey } from '@/features/player/period'
+import { buildMatchPositions } from '@/features/player/matchPositions'
+import type { RoleKey } from '@/features/player/roles'
 import { Section } from '@/shared/ui/Surface'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { ErrorState } from '@/shared/ui/States'
 import { MathTooltip } from '@/shared/ui/Tooltip'
 import { compact, dec, duration, num, pct, plural } from '@/shared/lib/format'
+import { isRadiantSlot } from '@/shared/api/types'
 
 const OVERVIEW_MATCHES = 20
 
@@ -43,6 +48,11 @@ export function PlayerPage() {
   const [period, setPeriod] = useState<PeriodKey>('month')
   const [tab, setTab] = useState<TabKey>('overview')
   const [matchesTabOpened, setMatchesTabOpened] = useState(false)
+  const [filters, setFilters] = useState<{ heroId: number | null; outcome: 'all' | 'win' | 'loss'; role: RoleKey | null }>({
+    heroId: null,
+    outcome: 'all',
+    role: null,
+  })
 
   useEffect(() => {
     if (tab === 'matches') setMatchesTabOpened(true)
@@ -55,6 +65,9 @@ export function PlayerPage() {
   const playerHeroes = usePlayerHeroes(valid ? accountId : undefined)
   const paged = usePlayerMatches(matchesTabOpened && valid ? accountId : undefined)
   const stratzStatus = useStratzStatus()
+  const stratzOk = stratzStatus.data === true
+  const roleMatches = usePlayerRoleMatches(valid ? accountId : undefined, null, stratzOk)
+  const matchPositions = useMemo(() => buildMatchPositions(roleMatches.data), [roleMatches.data])
 
   useDocumentTitle(
     profile.data?.profile?.personaname ?? (valid ? `Игрок ${accountId}` : 'Игрок'),
@@ -62,8 +75,31 @@ export function PlayerPage() {
 
   const all = useMemo(() => history.data ?? [], [history.data])
   const stats = usePlayerStats(all, period)
-  const timestamps = useMemo(() => all.map((match) => match.start_time), [all])
+  const activityMatches = useMemo(
+    () =>
+      all.map((match) => ({
+        time: match.start_time,
+        win: match.radiant_win === null ? null : match.radiant_win === isRadiantSlot(match.player_slot),
+      })),
+    [all],
+  )
   const pagedFlat = useMemo(() => paged.data?.pages.flat() ?? [], [paged.data])
+
+  const filteredMatches = useMemo(() => {
+    return pagedFlat.filter((match) => {
+      if (filters.heroId !== null && match.hero_id !== filters.heroId) return false
+      if (filters.outcome !== 'all') {
+        const win = match.radiant_win === null ? null : match.radiant_win === isRadiantSlot(match.player_slot)
+        if (filters.outcome === 'win' && win !== true) return false
+        if (filters.outcome === 'loss' && win !== false) return false
+      }
+      if (filters.role !== null) {
+        const position = matchPositions.get(match.match_id)
+        if (!position || position.role !== filters.role) return false
+      }
+      return true
+    })
+  }, [pagedFlat, filters, matchPositions])
 
   if (!valid) {
     return <ErrorState message="Некорректный идентификатор игрока в адресе страницы." />
@@ -222,13 +258,16 @@ export function PlayerPage() {
             </Section>
           )}
 
-          <WinrateTrend matches={all} loading={history.isPending} />
-
-          {history.isPending ? (
-            <Skeleton className="h-[190px] w-full rounded-panel" />
-          ) : (
-            <ActivityGraph timestamps={timestamps} />
-          )}
+          <Section title="Динамика">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <WinrateTrend matches={all} loading={history.isPending} />
+              {history.isPending ? (
+                <Skeleton className="h-[190px] w-full rounded-panel" />
+              ) : (
+                <ActivityGraph matches={activityMatches} />
+              )}
+            </div>
+          </Section>
 
           {stats.games > 0 && (
             <p className="text-[12px] text-ink-3">
@@ -246,6 +285,7 @@ export function PlayerPage() {
               matches={all.slice(0, OVERVIEW_MATCHES)}
               heroes={heroes.data}
               loading={history.isPending}
+              positions={matchPositions}
             />
           </Section>
 
@@ -274,21 +314,43 @@ export function PlayerPage() {
 
       {tab === 'matches' && (
         <Section title="Все матчи" aside={`история до ${HISTORY_SIZE} последних игр`}>
-          {paged.isError ? (
-            <ErrorState
-              message={paged.error instanceof Error ? paged.error.message : 'Неизвестная ошибка'}
-              onRetry={() => void paged.refetch()}
+          <div className="flex flex-col gap-4">
+            <MatchFilters
+              heroes={heroes.data}
+              state={filters}
+              onChange={setFilters}
+              roleFilterAvailable={stratzOk}
             />
-          ) : (
-            <>
-              <MatchList matches={pagedFlat} heroes={heroes.data} loading={!matchesTabOpened || paged.isPending} />
-              <LoadMore
-                hasMore={paged.hasNextPage}
-                loading={paged.isFetchingNextPage}
-                onLoad={() => void paged.fetchNextPage()}
+
+            {paged.isError ? (
+              <ErrorState
+                message={paged.error instanceof Error ? paged.error.message : 'Неизвестная ошибка'}
+                onRetry={() => void paged.refetch()}
               />
-            </>
-          )}
+            ) : (
+              <>
+                <MatchList
+                  matches={filteredMatches}
+                  heroes={heroes.data}
+                  loading={!matchesTabOpened || paged.isPending}
+                  positions={matchPositions}
+                  emptyTitle="Под фильтр ничего не попало"
+                  emptyHint="Попробуйте сбросить героя, исход или роль."
+                />
+                {(filters.heroId !== null || filters.outcome !== 'all' || filters.role !== null) &&
+                paged.hasNextPage ? (
+                  <p className="text-[12px] text-ink-3">
+                    Фильтр работает по уже загруженной истории - подгрузите ещё матчей ниже, если нужного не нашлось.
+                  </p>
+                ) : null}
+                <LoadMore
+                  hasMore={paged.hasNextPage}
+                  loading={paged.isFetchingNextPage}
+                  onLoad={() => void paged.fetchNextPage()}
+                />
+              </>
+            )}
+          </div>
         </Section>
       )}
 

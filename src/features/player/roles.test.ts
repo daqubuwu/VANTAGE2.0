@@ -4,6 +4,7 @@ import type { StratzRoleMatch } from '@/shared/api/types'
 
 function make(partial: Partial<StratzRoleMatch>): StratzRoleMatch {
   return {
+    matchId: null,
     position: 'POSITION_1',
     isVictory: true,
     goldPerMinute: 500,

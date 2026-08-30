@@ -38,6 +38,7 @@ const PLAYER_ROLE_MATCHES_QUERY = `
   query PlayerRoleMatches($steamAccountId: Long!, $take: Int!, $startDateTime: Long) {
     player(steamAccountId: $steamAccountId) {
       matches(request: { take: $take, startDateTime: $startDateTime }) {
+        id
         players(steamAccountId: $steamAccountId) {
           position
           isVictory
@@ -56,6 +57,7 @@ const PLAYER_ROLE_MATCHES_QUERY = `
 interface PlayerRoleMatchesResult {
   player: {
     matches: {
+      id: number | null
       players: {
         position: string | null
         isVictory: boolean | null
@@ -77,5 +79,5 @@ export async function stratzPlayerRoleMatches(accountId: number, take: number, s
     startDateTime,
   })
   const matches = result.player?.matches ?? []
-  return matches.flatMap((match) => match.players)
+  return matches.flatMap((match) => match.players.map((player) => ({ ...player, matchId: match.id })))
 }

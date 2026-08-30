@@ -1,28 +1,36 @@
 import { useMemo } from 'react'
-import { buildActivity, activityLevel } from './activity'
+import { buildActivity, activityIntensity } from './activity'
+import type { ActivityMatch } from './activity'
+import { winrateColor } from './chartColor'
 import { Tooltip } from '@/shared/ui/Tooltip'
 import { plural } from '@/shared/lib/format'
 
 const CELL = 11
 const GAP = 3
-
-const LEVEL_COLOR = [
-  'rgba(255,255,255,.05)',
-  'rgba(0,207,227,.22)',
-  'rgba(0,207,227,.42)',
-  'rgba(0,207,227,.68)',
-  'rgba(55,234,255,.95)',
-]
+const NEUTRAL = '97, 106, 115'
 
 interface ActivityGraphProps {
-  timestamps: number[]
+  matches: ActivityMatch[]
 }
 
-export function ActivityGraph({ timestamps }: ActivityGraphProps) {
-  const grid = useMemo(() => buildActivity(timestamps), [timestamps])
+function cellColor(count: number, wins: number, losses: number, max: number) {
+  if (count === 0) return 'rgba(255,255,255,.05)'
+  const intensity = activityIntensity(count, max)
+  const decided = wins + losses
+  if (decided === 0) return `rgba(${NEUTRAL}, ${intensity})`
+  return winrateColor(wins / decided).replace('rgb(', 'rgba(').replace(')', `, ${intensity})`)
+}
+
+export function ActivityGraph({ matches }: ActivityGraphProps) {
+  const grid = useMemo(() => buildActivity(matches), [matches])
 
   return (
     <div className="surface-panel flex flex-col gap-3 p-4">
+      <div className="flex items-baseline justify-between gap-4">
+        <h3 className="text-[13px] font-semibold text-ink">Активность</h3>
+        <span className="text-[11px] text-ink-3">цвет ячейки - винрейт дня</span>
+      </div>
+
       <p className="text-[13px] text-ink-2">
         <span className="font-semibold text-ink">
           {grid.total} {plural(grid.total, 'матч', 'матча', 'матчей')}
@@ -63,7 +71,7 @@ export function ActivityGraph({ timestamps }: ActivityGraphProps) {
                           {': '}
                           {cell.count === 0
                             ? 'игр нет'
-                            : `${cell.count} ${plural(cell.count, 'матч', 'матча', 'матчей')}`}
+                            : `${cell.count} ${plural(cell.count, 'матч', 'матча', 'матчей')}, ${cell.wins}-${cell.losses}`}
                         </span>
                       }
                     >
@@ -73,7 +81,7 @@ export function ActivityGraph({ timestamps }: ActivityGraphProps) {
                         style={{
                           width: CELL,
                           height: CELL,
-                          background: LEVEL_COLOR[activityLevel(cell.count, grid.max)],
+                          background: cellColor(cell.count, cell.wins, cell.losses, grid.max),
                         }}
                       />
                     </Tooltip>

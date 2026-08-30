@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { Hero, PlayerMatch } from '@/shared/api/types'
 import { MatchRow } from './MatchRow'
+import type { MatchPosition } from './matchPositions'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { EmptyState } from '@/shared/ui/States'
 
@@ -8,9 +9,19 @@ interface MatchListProps {
   matches: PlayerMatch[]
   heroes: Map<number, Hero> | undefined
   loading?: boolean
+  positions?: Map<number, MatchPosition>
+  emptyTitle?: string
+  emptyHint?: string
 }
 
-export function MatchList({ matches, heroes, loading }: MatchListProps) {
+export function MatchList({
+  matches,
+  heroes,
+  loading,
+  positions,
+  emptyTitle = 'Матчей за период нет',
+  emptyHint = 'Выберите другой период.',
+}: MatchListProps) {
   if (loading) {
     return (
       <div className="flex flex-col gap-1.5">
@@ -22,13 +33,18 @@ export function MatchList({ matches, heroes, loading }: MatchListProps) {
   }
 
   if (matches.length === 0) {
-    return <EmptyState title="Матчей за период нет" hint="Выберите другой период." />
+    return <EmptyState title={emptyTitle} hint={emptyHint} />
   }
 
   return (
     <div className="flex flex-col divide-y divide-line">
       {matches.map((match) => (
-        <MatchRow key={match.match_id} match={match} hero={heroes?.get(match.hero_id)} />
+        <MatchRow
+          key={match.match_id}
+          match={match}
+          hero={heroes?.get(match.hero_id)}
+          position={positions?.get(match.match_id)}
+        />
       ))}
     </div>
   )

@@ -276,7 +276,8 @@ export function match(matchId) {
 const STRATZ_POSITIONS = ['POSITION_1', 'POSITION_2', 'POSITION_3', 'POSITION_4', 'POSITION_5']
 
 export function stratzRoleMatches(count = 60) {
-  return Array.from({ length: count }, () => ({
+  return Array.from({ length: count }, (_, i) => ({
+    matchId: 8_100_000_000 + i,
     position: STRATZ_POSITIONS[Math.floor(rnd() * STRATZ_POSITIONS.length)],
     isVictory: rnd() > 0.45,
     goldPerMinute: 350 + Math.floor(rnd() * 400),

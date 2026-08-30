@@ -121,6 +121,7 @@ export type StratzPosition =
   | null
 
 export interface StratzRoleMatch {
+  matchId: number | null
   position: StratzPosition
   isVictory: boolean | null
   goldPerMinute: number | null
