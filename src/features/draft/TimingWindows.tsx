@@ -19,12 +19,21 @@ export function TimingWindows({ rows }: { rows: TimingRow[] }) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="surface-panel flex flex-col divide-y divide-line p-0">
+      <div className="flex items-center gap-3 px-4 py-2.5 text-[11px] text-ink-3">
+        <span className="w-[52px] shrink-0">Минута</span>
+        <span className="flex-1">Winrate по стороне</span>
+      </div>
       {rows.map((row) => (
-        <div key={row.bin} className="flex items-center gap-3">
-          <span className="num w-[52px] shrink-0 text-[12px] text-ink-3">{label(row.bin)}</span>
-          <div className="flex flex-1 flex-col gap-1">
+        <div key={row.bin} className="flex items-center gap-3 px-4 py-3">
+          <span className="num w-[52px] shrink-0 text-[12px] font-medium text-ink">{label(row.bin)}</span>
+          <div className="flex flex-1 flex-col gap-1.5">
             <div className="flex items-center gap-2">
+              <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full"
+                style={{ background: 'var(--color-radiant)' }}
+                aria-hidden
+              />
               <span className="w-14 shrink-0 text-[11px] text-ink-3">Radiant</span>
               {row.radiantWinrate === null ? (
                 <span className="text-[11px] text-ink-3">нет данных</span>
@@ -41,6 +50,11 @@ export function TimingWindows({ rows }: { rows: TimingRow[] }) {
               )}
             </div>
             <div className="flex items-center gap-2">
+              <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full"
+                style={{ background: 'var(--color-dire)' }}
+                aria-hidden
+              />
               <span className="w-14 shrink-0 text-[11px] text-ink-3">Dire</span>
               {row.direWinrate === null ? (
                 <span className="text-[11px] text-ink-3">нет данных</span>

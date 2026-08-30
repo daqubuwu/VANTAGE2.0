@@ -12,8 +12,8 @@ import {
 import { useDocumentTitle } from '@/shared/lib/useDocumentTitle'
 import { isMatchParsed, isRadiantSlot } from '@/shared/api/types'
 import { Section } from '@/shared/ui/Surface'
-import { Skeleton } from '@/shared/ui/Skeleton'
-import { ErrorState } from '@/shared/ui/States'
+import { Skeleton, SkeletonRows } from '@/shared/ui/Skeleton'
+import { ErrorState, EmptyState } from '@/shared/ui/States'
 import { MatchHeader } from '@/features/match/MatchHeader'
 import { RosterTable } from '@/features/match/RosterTable'
 import { GoldTimeline } from '@/features/match/GoldTimeline'
@@ -78,7 +78,7 @@ export function MatchPage() {
         {!parsed && (
           <div className="surface-panel flex flex-wrap items-center justify-between gap-3 p-4">
             <span className="text-[13px] text-ink-2">
-              Матч не разобран — тайминги предметов, урон по минутам и таланты недоступны.
+              Матч не разобран - тайминги предметов, урон по минутам и таланты недоступны.
             </span>
             <button
               type="button"
@@ -107,31 +107,61 @@ export function MatchPage() {
 
         {parsed && (
           <Section title="Способности и таланты">
-            <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
-              {data.players.map((player) => {
+            {heroAbilities.isPending || abilityIds.isPending || abilities.isPending || heroes.isPending ? (
+              <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+                <SkeletonRows rows={4} height={28} />
+                <SkeletonRows rows={4} height={28} />
+              </div>
+            ) : heroAbilities.isError || abilityIds.isError || abilities.isError ? (
+              <ErrorState
+                message="Не удалось загрузить справочник способностей OpenDota."
+                onRetry={() => {
+                  void heroAbilities.refetch()
+                  void abilityIds.refetch()
+                  void abilities.refetch()
+                }}
+              />
+            ) : (() => {
+              const builds = data.players.map((player) => {
                 const hero = heroes.data?.get(player.hero_id)
                 const heroAbilityMeta = hero ? heroAbilities.data?.get(hero.name) : undefined
                 const build = buildAbilityBuild(heroAbilityMeta, abilityIds.data, player.ability_upgrades_arr)
-                if (build.talents.every((tier) => tier.options.length === 0)) return null
+                return { player, hero, build }
+              })
+              const visible = builds.filter(({ build }) => build.talents.some((tier) => tier.options.length > 0))
 
+              if (visible.length === 0) {
                 return (
-                  <div key={player.player_slot} className="flex flex-col gap-2">
-                    <span className="flex items-center gap-2">
-                      <HeroIcon hero={hero} size={22} link={false} />
-                      <span className="text-[12px] text-ink-2">{hero?.localized_name ?? '—'}</span>
-                      <span
-                        className="h-1.5 w-1.5 rounded-full"
-                        style={{
-                          background: isRadiantSlot(player.player_slot) ? 'var(--color-radiant)' : 'var(--color-dire)',
-                        }}
-                        aria-hidden
-                      />
-                    </span>
-                    <TalentTree build={build} abilities={abilities.data} />
-                  </div>
+                  <EmptyState
+                    title="Нет данных о талантах для этого матча"
+                    hint="OpenDota пока не отдал ability_upgrades для этих игроков."
+                  />
                 )
-              })}
-            </div>
+              }
+
+              return (
+                <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+                  {visible.map(({ player, hero, build }) => (
+                    <div key={player.player_slot} className="flex flex-col gap-2">
+                      <span className="flex items-center gap-2">
+                        <HeroIcon hero={hero} size={22} link={false} />
+                        <span className="text-[12px] text-ink-2">{hero?.localized_name ?? '—'}</span>
+                        <span
+                          className="h-1.5 w-1.5 rounded-full"
+                          style={{
+                            background: isRadiantSlot(player.player_slot)
+                              ? 'var(--color-radiant)'
+                              : 'var(--color-dire)',
+                          }}
+                          aria-hidden
+                        />
+                      </span>
+                      <TalentTree build={build} abilities={abilities.data} />
+                    </div>
+                  ))}
+                </div>
+              )
+            })()}
           </Section>
         )}
       </div>
