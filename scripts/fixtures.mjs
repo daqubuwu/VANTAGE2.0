@@ -1,25 +1,25 @@
 const HERO_NAMES = [
-  [1, 'antimage', 'Anti-Mage'],
-  [8, 'juggernaut', 'Juggernaut'],
-  [11, 'nevermore', 'Shadow Fiend'],
-  [14, 'pudge', 'Pudge'],
-  [19, 'tiny', 'Tiny'],
-  [26, 'lion', 'Lion'],
-  [35, 'sniper', 'Sniper'],
-  [41, 'faceless_void', 'Faceless Void'],
-  [44, 'phantom_assassin', 'Phantom Assassin'],
-  [74, 'invoker', 'Invoker'],
-  [86, 'rubick', 'Rubick'],
-  [114, 'monkey_king', 'Monkey King'],
+  [1, 'antimage', 'Anti-Mage', ['Carry', 'Escape']],
+  [8, 'juggernaut', 'Juggernaut', ['Carry', 'Pusher']],
+  [11, 'nevermore', 'Shadow Fiend', ['Carry', 'Nuker']],
+  [14, 'pudge', 'Pudge', ['Disabler', 'Durable', 'Initiator']],
+  [19, 'tiny', 'Tiny', ['Carry', 'Nuker', 'Initiator']],
+  [26, 'lion', 'Lion', ['Support', 'Disabler', 'Nuker']],
+  [35, 'sniper', 'Sniper', ['Carry', 'Nuker']],
+  [41, 'faceless_void', 'Faceless Void', ['Carry', 'Initiator', 'Durable']],
+  [44, 'phantom_assassin', 'Phantom Assassin', ['Carry', 'Escape']],
+  [74, 'invoker', 'Invoker', ['Carry', 'Nuker', 'Disabler', 'Initiator']],
+  [86, 'rubick', 'Rubick', ['Support', 'Disabler', 'Nuker']],
+  [114, 'monkey_king', 'Monkey King', ['Carry', 'Escape', 'Initiator']],
 ]
 
-export const heroes = HERO_NAMES.map(([id, slug, localized]) => ({
+export const heroes = HERO_NAMES.map(([id, slug, localized, roles]) => ({
   id,
   name: `npc_dota_hero_${slug}`,
   localized_name: localized,
   primary_attr: 'agi',
   attack_type: 'Melee',
-  roles: ['Carry'],
+  roles,
 }))
 
 export const player = {
@@ -116,14 +116,14 @@ export const abilities = {
   special_bonus_unique_antimage_8: { dname: '+1 к дальности Blink' },
 }
 
-export const heroStats = HERO_NAMES.map(([id, slug, localized]) => {
+export const heroStats = HERO_NAMES.map(([id, slug, localized, roles]) => {
   const stat = {
     id,
     name: `npc_dota_hero_${slug}`,
     localized_name: localized,
     primary_attr: 'agi',
     attack_type: 'Melee',
-    roles: ['Carry'],
+    roles,
     img: `/${slug}.png`,
     icon: `/${slug}_icon.png`,
     base_health: 200,
