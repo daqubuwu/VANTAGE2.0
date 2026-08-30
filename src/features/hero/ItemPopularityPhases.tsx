@@ -23,7 +23,7 @@ export function ItemPopularityPhases({ phases }: ItemPopularityPhasesProps) {
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {phases.map((phase) => (
-        <div key={phase.key} className="surface-panel flex flex-col gap-2.5">
+        <div key={phase.key} className="surface-panel flex flex-col gap-2.5 p-3.5">
           <div className="flex flex-col gap-0.5">
             <span className="text-[12px] font-medium text-ink-2">{phase.label}</span>
             <span className="text-[11px] text-ink-3">{phase.timing}</span>
@@ -50,6 +50,7 @@ export function ItemPopularityPhases({ phases }: ItemPopularityPhasesProps) {
                           alt={item.meta.dname}
                           className="h-full w-full object-cover"
                           loading="lazy"
+                          crossOrigin="anonymous"
                         />
                       </span>
                       <span className="truncate text-[12px] text-ink-2">{item.meta.dname}</span>

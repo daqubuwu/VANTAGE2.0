@@ -98,8 +98,23 @@
   }
 
   p { margin: 0; }
-  a { color: inherit; text-decoration: none; }
-  button { font: inherit; color: inherit; background: none; border: none; padding: 0; }
+  a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--dur) var(--ease-out-expo), background-color var(--dur) var(--ease-out-expo),
+      border-color var(--dur) var(--ease-out-expo), transform var(--dur) var(--ease-out-expo),
+      opacity var(--dur) var(--ease-out-expo);
+  }
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color var(--dur) var(--ease-out-expo), background-color var(--dur) var(--ease-out-expo),
+      border-color var(--dur) var(--ease-out-expo), transform var(--dur) var(--ease-out-expo),
+      opacity var(--dur) var(--ease-out-expo);
+  }
   input { font: inherit; }
   ul, ol { margin: 0; padding: 0; list-style: none; }
 
@@ -138,6 +153,19 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
+@utility surface-interactive {
+  transition: border-color var(--dur) var(--ease-out-expo), transform var(--dur) var(--ease-out-expo),
+    box-shadow var(--dur) var(--ease-out-expo), background-color var(--dur) var(--ease-out-expo);
+  &:hover {
+    border-color: var(--accent-line);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  }
+  &:active {
+    transform: translateY(0);
+  }
+}
+
 @keyframes vantage-shimmer {
   from { background-position: -180% 0; }
   to { background-position: 180% 0; }
@@ -146,6 +174,11 @@
 @keyframes vantage-rise {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
+}
+
+@keyframes vantage-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(1.5%, -1.5%, 0) scale(1.03); }
 }
 
 @media (prefers-reduced-motion: reduce) {

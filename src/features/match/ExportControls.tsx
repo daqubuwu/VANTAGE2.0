@@ -31,13 +31,15 @@ export function ExportControls({ targetRef, fileName }: ExportControlsProps) {
       const dataUrl = await toPng(targetRef.current, {
         backgroundColor: '#06080b',
         pixelRatio: 2,
+        cacheBust: true,
+        skipFonts: true,
       })
       const link = document.createElement('a')
       link.href = dataUrl
       link.download = `${fileName}.png`
       link.click()
-    } catch {
-      setError('Не удалось собрать картинку')
+    } catch (err) {
+      setError(err instanceof Error && err.message ? `Не удалось собрать картинку: ${err.message}` : 'Не удалось собрать картинку')
     } finally {
       setExporting(false)
     }

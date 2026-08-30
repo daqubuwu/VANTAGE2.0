@@ -14,7 +14,7 @@ interface CounterPanelProps {
 
 export function CounterPanel({ title, rows, heroes, onPick }: CounterPanelProps) {
   return (
-    <div className="surface-panel flex flex-col gap-2">
+    <div className="surface-panel flex flex-col gap-2 p-4">
       <span className="text-[12px] font-medium text-ink-2">{title}</span>
       {rows.length === 0 ? (
         <EmptyState title="Пока нет вражеских пиков" hint="Добавьте героя в соперника, появятся рекомендации." />

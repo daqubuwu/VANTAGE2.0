@@ -5,7 +5,7 @@ import { HeroIcon } from '@/shared/ui/HeroIcon'
 import { EmptyState } from '@/shared/ui/States'
 import { winrateColor } from '@/features/player/chartColor'
 import { pct } from '@/shared/lib/format'
-import { ROLE_ORDER, roleLabel } from '@/features/meta/heroRoles'
+import { CLASSIC_ROLE_ORDER, classicRole, classicRoleLabel } from '@/features/meta/heroRoles'
 
 interface HeroMatchupsProps {
   best: RankedMatchup[]
@@ -17,11 +17,11 @@ export function HeroMatchups({ best, worst, heroes }: HeroMatchupsProps) {
   const [role, setRole] = useState<string | null>(null)
 
   const filteredBest = useMemo(
-    () => (role === null ? best : best.filter((row) => heroes?.get(row.heroId)?.roles.includes(role))),
+    () => (role === null ? best : best.filter((row) => classicRole(heroes?.get(row.heroId)?.roles) === role)),
     [best, role, heroes],
   )
   const filteredWorst = useMemo(
-    () => (role === null ? worst : worst.filter((row) => heroes?.get(row.heroId)?.roles.includes(role))),
+    () => (role === null ? worst : worst.filter((row) => classicRole(heroes?.get(row.heroId)?.roles) === role)),
     [worst, role, heroes],
   )
 
@@ -48,7 +48,7 @@ export function HeroMatchups({ best, worst, heroes }: HeroMatchupsProps) {
         >
           Все роли
         </button>
-        {ROLE_ORDER.map((key) => {
+        {CLASSIC_ROLE_ORDER.map((key) => {
           const active = key === role
           return (
             <button
@@ -61,7 +61,7 @@ export function HeroMatchups({ best, worst, heroes }: HeroMatchupsProps) {
                 active ? 'bg-accent font-medium text-[#04171a]' : 'text-ink-2 hover:bg-surface-2 hover:text-ink'
               }`}
             >
-              {roleLabel(key)}
+              {classicRoleLabel(key)}
             </button>
           )
         })}
@@ -83,7 +83,7 @@ interface MatchupColumnProps {
 
 function MatchupColumn({ title, rows, heroes }: MatchupColumnProps) {
   return (
-    <div className="surface-panel flex flex-col gap-3">
+    <div className="surface-panel flex flex-col gap-3 p-4">
       <span className="border-b border-line pb-2.5 text-[12px] font-medium text-ink-2">{title}</span>
       {rows.length === 0 ? (
         <span className="text-[12px] text-ink-3">недостаточно игр под этот фильтр</span>

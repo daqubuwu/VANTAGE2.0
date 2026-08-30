@@ -9,10 +9,3 @@ export function itemSlotIds(player: MatchPlayer) {
 export function neutralItemId(player: MatchPlayer) {
   return player.item_neutral
 }
-
-export function purchaseTime(player: MatchPlayer, itemKey: string | undefined) {
-  if (!itemKey) return null
-  const log = player.purchase_log ?? []
-  const entry = log.find((row) => row.key === itemKey || row.key === `item_${itemKey}`)
-  return entry ? entry.time : null
-}

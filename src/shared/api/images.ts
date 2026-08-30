@@ -20,7 +20,8 @@ export function itemImage(itemName: string) {
   return `${CDN}/apps/dota2/images/dota_react/items/${itemName}.png`
 }
 
-export function abilityImage(abilityName: string) {
+export function abilityImage(abilityName: string, imgPath?: string | null) {
+  if (imgPath) return `${CDN}${imgPath}`
   return `${CDN}/apps/dota2/images/dota_react/abilities/${abilityName}.png`
 }
 

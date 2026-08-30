@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Hero } from '@/shared/api/types'
 import type { TierRow } from './tierlist'
-import { roleLabel } from './heroRoles'
+import { classicRole, classicRoleLabel } from './heroRoles'
 import { HeroIcon } from '@/shared/ui/HeroIcon'
 import { EmptyState } from '@/shared/ui/States'
 import { winrateColor } from '@/features/player/chartColor'
@@ -96,9 +96,9 @@ export function HeroMetaTable({ rows, heroes }: HeroMetaTableProps) {
                       <span className="truncate text-[13px] text-ink">
                         {hero?.localized_name ?? `Герой ${row.heroId}`}
                       </span>
-                      {hero && hero.roles.length > 0 && (
+                      {hero && (
                         <span className="truncate text-[11px] text-ink-3">
-                          {hero.roles.slice(0, 2).map(roleLabel).join(' · ')}
+                          {classicRoleLabel(classicRole(hero.roles))}
                         </span>
                       )}
                     </div>

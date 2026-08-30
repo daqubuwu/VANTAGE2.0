@@ -1,5 +1,6 @@
 import type { Hero } from '@/shared/api/types'
 import type { TierRow } from '@/features/meta/tierlist'
+import { classicRole } from '@/features/meta/heroRoles'
 
 export interface BanFilters {
   role: string | null
@@ -16,6 +17,6 @@ export function suggestBans(
   return tierRows
     .filter((row) => !excludeIds.has(row.heroId))
     .filter((row) => row.games >= filters.minGames)
-    .filter((row) => filters.role === null || (heroes?.get(row.heroId)?.roles.includes(filters.role) ?? false))
+    .filter((row) => filters.role === null || classicRole(heroes?.get(row.heroId)?.roles) === filters.role)
     .slice(0, limit)
 }

@@ -5,7 +5,7 @@ import { suggestBans } from './bans'
 import { HeroIcon } from '@/shared/ui/HeroIcon'
 import { EmptyState } from '@/shared/ui/States'
 import { winrateColor } from '@/features/player/chartColor'
-import { ROLE_ORDER, roleLabel } from '@/features/meta/heroRoles'
+import { CLASSIC_ROLE_ORDER, classicRoleLabel } from '@/features/meta/heroRoles'
 import { pct } from '@/shared/lib/format'
 
 const PAGE_SIZE = 8
@@ -47,7 +47,7 @@ export function BanSuggestions({ tierRows, excludeIds, heroes, onPick }: BanSugg
           >
             Все роли
           </button>
-          {ROLE_ORDER.map((key) => {
+          {CLASSIC_ROLE_ORDER.map((key) => {
             const active = key === role
             return (
               <button
@@ -60,7 +60,7 @@ export function BanSuggestions({ tierRows, excludeIds, heroes, onPick }: BanSugg
                   active ? 'bg-accent font-medium text-[#04171a]' : 'text-ink-2 hover:bg-surface-2 hover:text-ink'
                 }`}
               >
-                {roleLabel(key)}
+                {classicRoleLabel(key)}
               </button>
             )
           })}

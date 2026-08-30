@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 function initials(name: string) {
   const words = name.trim().split(/\s+/).filter(Boolean)
   const first = words[0]
@@ -9,11 +11,30 @@ function initials(name: string) {
 
 interface TeamBadgeProps {
   name: string | null
+  logoUrl?: string | null
   size?: number
 }
 
-export function TeamBadge({ name, size = 26 }: TeamBadgeProps) {
+export function TeamBadge({ name, logoUrl, size = 26 }: TeamBadgeProps) {
   const label = name ?? '?'
+  const [broken, setBroken] = useState(false)
+
+  if (logoUrl && !broken) {
+    return (
+      <span
+        className="flex shrink-0 items-center justify-center overflow-hidden rounded-ctl bg-surface-2"
+        style={{ width: size, height: size }}
+      >
+        <img
+          src={logoUrl}
+          alt=""
+          crossOrigin="anonymous"
+          className="h-full w-full object-contain"
+          onError={() => setBroken(true)}
+        />
+      </span>
+    )
+  }
 
   return (
     <span

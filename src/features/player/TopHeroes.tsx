@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import type { Hero, PlayerHeroRow } from '@/shared/api/types'
+import type { Hero } from '@/shared/api/types'
+import type { HeroRow } from './heroAggregate'
 import { HeroIcon } from '@/shared/ui/HeroIcon'
 import { Bar } from '@/shared/ui/Stat'
 import { Skeleton } from '@/shared/ui/Skeleton'
@@ -7,7 +8,7 @@ import { EmptyState } from '@/shared/ui/States'
 import { pct } from '@/shared/lib/format'
 
 interface TopHeroesProps {
-  rows: PlayerHeroRow[]
+  rows: HeroRow[]
   heroes: Map<number, Hero> | undefined
   loading: boolean
   limit?: number
@@ -43,10 +44,10 @@ export function TopHeroes({ rows, heroes, loading, limit = 8, minGames = 3 }: To
   return (
     <div className="grid gap-x-8 gap-y-1 md:grid-cols-2">
       {top.map((row) => {
-        const hero = heroes?.get(Number(row.hero_id))
-        const winrate = row.games > 0 ? row.win / row.games : 0
+        const hero = heroes?.get(row.heroId)
+        const winrate = row.winrate ?? 0
         return (
-          <div key={row.hero_id} className="flex items-center gap-3 py-1.5">
+          <div key={row.heroId} className="flex items-center gap-3 py-1.5">
             <HeroIcon hero={hero} size={26} />
             <span className="min-w-0 flex-1 truncate text-[13px] text-ink">
               {hero?.localized_name ?? '—'}

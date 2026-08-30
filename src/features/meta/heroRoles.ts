@@ -1,27 +1,28 @@
-export const ROLE_ORDER = [
-  'Carry',
-  'Support',
-  'Nuker',
-  'Disabler',
-  'Initiator',
-  'Durable',
-  'Escape',
-  'Pusher',
-  'Jungler',
-] as const
+export type ClassicRole = 'carry' | 'mid' | 'offlane' | 'support' | 'hardsupport'
 
-export const ROLE_LABEL_RU: Record<string, string> = {
-  Carry: 'Керри',
-  Support: 'Поддержка',
-  Nuker: 'Нюкер',
-  Disabler: 'Контроль',
-  Initiator: 'Инициатор',
-  Durable: 'Танк',
-  Escape: 'Побег',
-  Pusher: 'Пушер',
-  Jungler: 'Джунглер',
+export const CLASSIC_ROLE_ORDER: ClassicRole[] = ['carry', 'mid', 'offlane', 'support', 'hardsupport']
+
+export const CLASSIC_ROLE_LABEL: Record<ClassicRole, string> = {
+  carry: 'Керри',
+  mid: 'Мид',
+  offlane: 'Оффлейн',
+  support: 'Поддержка',
+  hardsupport: 'Хардсаппорт',
 }
 
-export function roleLabel(role: string) {
-  return ROLE_LABEL_RU[role] ?? role
+export function classicRoleLabel(role: ClassicRole) {
+  return CLASSIC_ROLE_LABEL[role]
+}
+
+export function classicRole(roles: string[] | undefined): ClassicRole {
+  const tags = roles ?? []
+  const has = (tag: string) => tags.includes(tag)
+
+  if (has('Support')) {
+    return has('Initiator') || has('Disabler') ? 'support' : 'hardsupport'
+  }
+  if (has('Durable') || has('Initiator')) return 'offlane'
+  if (has('Carry')) return has('Nuker') ? 'mid' : 'carry'
+  if (has('Nuker')) return 'mid'
+  return 'offlane'
 }

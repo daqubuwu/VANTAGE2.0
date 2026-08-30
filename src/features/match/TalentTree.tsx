@@ -21,21 +21,27 @@ export function TalentTree({ build, abilities }: TalentTreeProps) {
     <div className="flex flex-col gap-3">
       {build.skills.length > 0 && (
         <div className="flex flex-wrap gap-1">
-          {build.skills.map((skill, i) => (
-            <Tooltip key={i} variant="hint" content={`${label(skill.name, abilities)} · ур. ${skill.level}`}>
-              <span className="relative block h-6 w-6 shrink-0 overflow-hidden rounded-[4px] bg-surface-2">
-                <img
-                  src={abilityImage(skill.name)}
-                  alt={label(skill.name, abilities)}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
-                <span className="num absolute bottom-0 right-0 rounded-tl-[3px] bg-bg/80 px-[3px] text-[8px] leading-[11px] text-ink-2">
-                  {skill.level}
+          {build.skills.map((skill, i) => {
+            const img = abilities?.[skill.name]?.img
+            return (
+              <Tooltip key={i} variant="hint" content={`${label(skill.name, abilities)} · ур. ${skill.level}`}>
+                <span className="relative block h-6 w-6 shrink-0 overflow-hidden rounded-[4px] bg-surface-2">
+                  {img && (
+                    <img
+                      src={abilityImage(skill.name, img)}
+                      alt={label(skill.name, abilities)}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      crossOrigin="anonymous"
+                    />
+                  )}
+                  <span className="num absolute bottom-0 right-0 rounded-tl-[3px] bg-bg/80 px-[3px] text-[8px] leading-[11px] text-ink-2">
+                    {skill.level}
+                  </span>
                 </span>
-              </span>
-            </Tooltip>
-          ))}
+              </Tooltip>
+            )
+          })}
         </div>
       )}
 

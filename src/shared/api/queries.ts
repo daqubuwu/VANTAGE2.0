@@ -58,12 +58,15 @@ export function useHeroStats() {
 export function useItemConstants() {
   return useQuery({
     queryKey: ['constants', 'items'],
-    queryFn: () => openDota.constants('items') as Promise<Record<string, { id: number; dname?: string; img?: string; cost?: number }>>,
+    queryFn: () =>
+      openDota.constants('items') as Promise<
+        Record<string, { id: number; dname?: string; img?: string; cost?: number; components?: string[] | null }>
+      >,
     ...options('constants'),
     select: (items) => {
-      const byId = new Map<number, { key: string; dname: string; cost: number }>()
+      const byId = new Map<number, { key: string; dname: string; cost: number; components: string[] }>()
       for (const [key, value] of Object.entries(items)) {
-        byId.set(value.id, { key, dname: value.dname ?? key, cost: value.cost ?? 0 })
+        byId.set(value.id, { key, dname: value.dname ?? key, cost: value.cost ?? 0, components: value.components ?? [] })
       }
       return byId
     },
@@ -215,6 +218,23 @@ export function useProMatches() {
   return useQuery({
     queryKey: ['proMatches'],
     queryFn: () => openDota.proMatches() as Promise<ProMatch[]>,
+    ...options('proScene'),
+  })
+}
+
+export function useTeams() {
+  return useQuery({
+    queryKey: ['teams'],
+    queryFn: async () => {
+      const rows = (await openDota.teams()) as TeamProfile[]
+      const byId = new Map(rows.map((team) => [team.team_id, team]))
+      const byName = new Map<string, TeamProfile>()
+      for (const team of rows) {
+        if (team.name) byName.set(team.name, team)
+        if (team.tag) byName.set(team.tag, team)
+      }
+      return { byId, byName }
+    },
     ...options('proScene'),
   })
 }

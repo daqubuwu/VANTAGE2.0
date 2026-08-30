@@ -64,6 +64,7 @@ export const openDota = {
   proMatches: (lessThanMatchId?: number) =>
     getJson<unknown[]>(url('/proMatches', { less_than_match_id: lessThanMatchId })),
   live: () => getJson<unknown[]>(url('/live')),
+  teams: () => getJson<unknown[]>(url('/teams')),
   team: (id: number) => getJson<unknown>(url(`/teams/${id}`)),
   teamMatches: (id: number) => getJson<unknown[]>(url(`/teams/${id}/matches`)),
   teamPlayers: (id: number) => getJson<unknown[]>(url(`/teams/${id}/players`)),

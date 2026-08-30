@@ -1,6 +1,6 @@
 import type { Hero } from '@/shared/api/types'
 import { heroPortrait } from '@/shared/api/images'
-import { roleLabel } from '@/features/meta/heroRoles'
+import { classicRole, classicRoleLabel } from '@/features/meta/heroRoles'
 
 const ATTR_LABEL: Record<Hero['primary_attr'], string> = {
   str: 'Сила',
@@ -25,6 +25,7 @@ export function HeroHeader({ hero }: { hero: Hero }) {
           alt={hero.localized_name}
           className="h-full w-full object-cover"
           loading="lazy"
+          crossOrigin="anonymous"
         />
       </span>
       <div className="flex flex-col gap-1.5">
@@ -32,7 +33,7 @@ export function HeroHeader({ hero }: { hero: Hero }) {
         <div className="flex flex-wrap items-center gap-2 text-[12px] text-ink-3">
           <span className={ATTR_TONE[hero.primary_attr]}>{ATTR_LABEL[hero.primary_attr]}</span>
           <span>{hero.attack_type === 'Melee' ? 'Ближний бой' : 'Дальний бой'}</span>
-          {hero.roles.length > 0 && <span>{hero.roles.map(roleLabel).join(', ')}</span>}
+          <span>{classicRoleLabel(classicRole(hero.roles))}</span>
         </div>
       </div>
     </div>

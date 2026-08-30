@@ -105,7 +105,7 @@ function CompareContent({ accountA, accountB }: CompareContentProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="surface-panel grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+      <div className="surface-panel grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-5 py-4">
         <PlayerHeaderCell accountId={accountA} name={profileA.data?.profile?.personaname} avatar={profileA.data?.profile?.avatarfull} align="right" />
         <ArrowsLeftRight size={20} className="shrink-0 text-ink-3" />
         <PlayerHeaderCell accountId={accountB} name={profileB.data?.profile?.personaname} avatar={profileB.data?.profile?.avatarfull} align="left" />

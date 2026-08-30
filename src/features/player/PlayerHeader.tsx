@@ -2,7 +2,8 @@ import type { PlayerProfile } from '@/shared/api/types'
 import { rankIcon, rankName, rankStar } from '@/shared/api/images'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { Tooltip } from '@/shared/ui/Tooltip'
-import { LockSimple } from '@phosphor-icons/react'
+import { useFavorites } from '@/shared/lib/favorites'
+import { LockSimple, Star } from '@phosphor-icons/react'
 
 interface PlayerHeaderProps {
   accountId: number
@@ -11,6 +12,8 @@ interface PlayerHeaderProps {
 }
 
 export function PlayerHeader({ accountId, profile, loading }: PlayerHeaderProps) {
+  const { isFavorite, toggle } = useFavorites()
+
   if (loading) {
     return (
       <div className="surface-feature flex items-center gap-4 px-5 py-4">
@@ -26,12 +29,14 @@ export function PlayerHeader({ accountId, profile, loading }: PlayerHeaderProps)
   const person = profile?.profile
   const closed = !person
   const star = rankStar(profile?.rank_tier ?? null)
+  const favorite = isFavorite(accountId)
+  const name = person?.personaname ?? `Аккаунт ${accountId}`
 
   return (
     <div className="surface-feature flex flex-wrap items-center gap-4 px-5 py-4">
       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-block bg-surface-2">
         {person?.avatarfull ? (
-          <img src={person.avatarfull} alt="" width={64} height={64} className="h-full w-full object-cover" />
+          <img src={person.avatarfull} alt="" width={64} height={64} crossOrigin="anonymous" className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-ink-3">
             <LockSimple size={22} />
@@ -40,8 +45,21 @@ export function PlayerHeader({ accountId, profile, loading }: PlayerHeaderProps)
       </div>
 
       <div className="flex min-w-0 flex-col gap-1">
-        <h1 className="truncate text-[24px] font-semibold">
-          {person?.personaname ?? `Аккаунт ${accountId}`}
+        <h1 className="flex min-w-0 items-center gap-2 truncate text-[24px] font-semibold">
+          {name}
+          <Tooltip content={favorite ? 'Убрать из избранного' : 'Добавить в избранное'} variant="hint">
+            <button
+              type="button"
+              onClick={() => toggle({ accountId, name, avatar: person?.avatarfull ?? null })}
+              className={`shrink-0 rounded-full p-1 transition-all hover:scale-110 active:scale-95 ${
+                favorite ? 'text-gold' : 'text-ink-3 hover:text-ink-2'
+              }`}
+              aria-pressed={favorite}
+              aria-label={favorite ? 'Убрать из избранного' : 'Добавить в избранное'}
+            >
+              <Star size={18} weight={favorite ? 'fill' : 'regular'} />
+            </button>
+          </Tooltip>
         </h1>
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-ink-3">
           <span className="num">ID {accountId}</span>
@@ -52,8 +70,8 @@ export function PlayerHeader({ accountId, profile, loading }: PlayerHeaderProps)
       <div className="ml-auto flex items-center gap-2.5">
         <Tooltip content={`Ранг: ${rankName(profile?.rank_tier ?? null)}`} variant="hint">
           <div className="relative h-12 w-12 shrink-0">
-            <img src={rankIcon(profile?.rank_tier ?? null)} alt="" className="h-full w-full" />
-            {star && <img src={star} alt="" className="absolute inset-0 h-full w-full" />}
+            <img src={rankIcon(profile?.rank_tier ?? null)} alt="" crossOrigin="anonymous" className="h-full w-full" />
+            {star && <img src={star} alt="" crossOrigin="anonymous" className="absolute inset-0 h-full w-full" />}
           </div>
         </Tooltip>
         <div className="flex flex-col">

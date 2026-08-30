@@ -26,6 +26,7 @@ export function HeroIcon({ hero, size = 32, variant = 'wide', link = true }: Her
           width={width}
           height={size}
           loading="lazy"
+          crossOrigin="anonymous"
           className="h-full w-full object-cover"
         />
       )}

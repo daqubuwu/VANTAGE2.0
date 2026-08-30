@@ -3,7 +3,7 @@ import type { BestPickRow } from './bestPick'
 import { HeroIcon } from '@/shared/ui/HeroIcon'
 import { EmptyState } from '@/shared/ui/States'
 import { winrateColor } from '@/features/player/chartColor'
-import { roleLabel } from '@/features/meta/heroRoles'
+import { classicRoleLabel } from '@/features/meta/heroRoles'
 import { pct } from '@/shared/lib/format'
 
 interface BestPickPanelProps {
@@ -41,7 +41,7 @@ export function BestPickPanel({ rows, heroes, onPick }: BestPickPanelProps) {
                 {row.counterWinrate !== null && `контрпик ${pct(row.counterWinrate, 0)}`}
                 {row.counterWinrate !== null && row.metaWinrate !== null && ' · '}
                 {row.metaWinrate !== null && `мета ${pct(row.metaWinrate, 0)}`}
-                {row.novelRoles.length > 0 && ` · закрывает ${row.novelRoles.map(roleLabel).join('/')}`}
+                {row.novelRole !== null && ` · закрывает ${classicRoleLabel(row.novelRole)}`}
               </span>
             </span>
             <span className="num shrink-0 text-[13px] font-semibold" style={{ color: winrateColor(row.score) }}>

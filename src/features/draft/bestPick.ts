@@ -1,23 +1,26 @@
 import type { Hero, HeroMatchup } from '@/shared/api/types'
 import type { TierRow } from '@/features/meta/tierlist'
 import { MIN_MATCHUP_GAMES } from '@/features/hero/matchups'
+import { classicRole } from '@/features/meta/heroRoles'
+import type { ClassicRole } from '@/features/meta/heroRoles'
 
 export interface BestPickRow {
   heroId: number
   score: number
   counterWinrate: number | null
   metaWinrate: number | null
-  novelRoles: string[]
+  novelRole: ClassicRole | null
 }
 
 const LIMIT = 8
 
 function roleCounts(allyIds: number[], heroes: Map<number, Hero>) {
-  const counts = new Map<string, number>()
+  const counts = new Map<ClassicRole, number>()
   for (const id of allyIds) {
     const hero = heroes.get(id)
     if (!hero) continue
-    for (const role of hero.roles) counts.set(role, (counts.get(role) ?? 0) + 1)
+    const role = classicRole(hero.roles)
+    counts.set(role, (counts.get(role) ?? 0) + 1)
   }
   return counts
 }
@@ -63,8 +66,10 @@ export function suggestBestPicks(
     const counterWinrate = counterEntry ? 1 - counterEntry.sum / counterEntry.n : null
     const metaWinrate = metaByHero.get(heroId) ?? null
 
-    const novelRoles = hero.roles.filter((role) => (allyRoles.get(role) ?? 0) === 0)
-    const noveltyScore = hero.roles.length > 0 ? novelRoles.length / hero.roles.length : 0
+    const role = classicRole(hero.roles)
+    const isNovel = (allyRoles.get(role) ?? 0) === 0
+    const novelRole = isNovel ? role : null
+    const noveltyScore = isNovel ? 1 : 0
 
     let score: number
     if (counterWinrate !== null && metaWinrate !== null) {
@@ -77,7 +82,7 @@ export function suggestBestPicks(
       continue
     }
 
-    rows.push({ heroId, score, counterWinrate, metaWinrate, novelRoles })
+    rows.push({ heroId, score, counterWinrate, metaWinrate, novelRole })
   }
 
   return rows.sort((a, b) => b.score - a.score).slice(0, LIMIT)

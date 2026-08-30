@@ -13,6 +13,7 @@ interface ItemMeta {
   key: string
   dname: string
   cost: number
+  components: string[]
 }
 
 interface RosterTableProps {

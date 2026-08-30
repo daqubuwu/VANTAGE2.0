@@ -1,5 +1,6 @@
 import type { HeroAbilityConstant } from '@/shared/api/queries'
 
+const TALENT_TIER_TO_LEVEL: Record<number, number> = { 1: 10, 2: 15, 3: 20, 4: 25 }
 const TALENT_LEVELS = [10, 15, 20, 25] as const
 
 export interface TalentTier {
@@ -42,9 +43,10 @@ export function buildAbilityBuild(
 
   const byLevel = new Map<number, string[]>()
   for (const talent of heroAbilities.talents) {
-    const list = byLevel.get(talent.level) ?? []
+    const level = TALENT_TIER_TO_LEVEL[talent.level] ?? talent.level
+    const list = byLevel.get(level) ?? []
     list.push(talent.name)
-    byLevel.set(talent.level, list)
+    byLevel.set(level, list)
   }
 
   const talents: TalentTier[] = TALENT_LEVELS.map((level) => ({

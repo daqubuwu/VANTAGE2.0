@@ -88,10 +88,12 @@ export const peers = []
 const ITEM_NAMES = ['blink', 'black_king_bar', 'power_treads', 'magic_wand', 'aghanims_scepter', 'butterfly']
 const NEUTRAL_ITEM_NAME = 'trusty_shovel'
 
+const COMPONENTS = { butterfly: ['power_treads'] }
+
 export const items = Object.fromEntries(
   [...ITEM_NAMES, NEUTRAL_ITEM_NAME].map((key, i) => [
     key,
-    { id: i + 1, dname: key.replace(/_/g, ' '), img: `/${key}.png`, cost: 1000 + i * 500 },
+    { id: i + 1, dname: key.replace(/_/g, ' '), img: `/${key}.png`, cost: 1000 + i * 500, components: COMPONENTS[key] ?? [] },
   ]),
 )
 
@@ -233,10 +235,13 @@ export function match(matchId) {
         time: 60 + Math.floor(rnd() * (duration - 60)),
         key: `npc_dota_hero_${HERO_NAMES[(i + k + 1) % HERO_NAMES.length][1]}`,
       })),
-      purchase_log: ITEM_NAMES.slice(0, 4).map((key, k) => ({ time: 120 + k * 300 + Math.floor(rnd() * 60), key })),
+      purchase_log: [
+        ...ITEM_NAMES.slice(0, 4).map((key, k) => ({ time: 120 + k * 300 + Math.floor(rnd() * 60), key })),
+        { time: 1500, key: 'butterfly' },
+      ],
       item_0: 1,
       item_1: 2,
-      item_2: 3,
+      item_2: 6,
       item_3: 0,
       item_4: 0,
       item_5: 0,

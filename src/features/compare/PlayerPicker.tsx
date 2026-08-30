@@ -13,7 +13,7 @@ export function PlayerPicker({ label, onSelect }: PlayerPickerProps) {
   const showResults = query.trim().length >= 2
 
   return (
-    <div className="surface-panel flex flex-col gap-2.5">
+    <div className="surface-panel flex flex-col gap-2.5 p-4">
       <span className="text-[12px] font-medium text-ink-2">{label}</span>
       <input
         value={query}

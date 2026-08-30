@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useProMatches, useLiveMatches } from '@/shared/api/queries'
+import { useProMatches, useLiveMatches, useTeams } from '@/shared/api/queries'
 import { useDocumentTitle } from '@/shared/lib/useDocumentTitle'
 import { Section } from '@/shared/ui/Surface'
 import { SkeletonRows } from '@/shared/ui/Skeleton'
@@ -13,10 +13,24 @@ export function EsportsPage() {
 
   const live = useLiveMatches()
   const pro = useProMatches()
+  const teams = useTeams()
+
+  function logoByName(name: string | null) {
+    if (!name) return null
+    return teams.data?.byName.get(name)?.logo_url ?? null
+  }
+
+  function logoById(id: number | null) {
+    if (id === null) return null
+    return teams.data?.byId.get(id)?.logo_url ?? null
+  }
 
   return (
     <div className="flex flex-col gap-8">
-      <Section title="Сейчас в эфире" aside="без оценки победителя - формула не согласована, честнее не гадать">
+      <Section
+        title="Сейчас в эфире"
+        aside="без оценки победителя и превью пиков - OpenDota не отдаёт эти поля в /live, честнее не гадать"
+      >
         {live.isPending ? (
           <SkeletonRows rows={4} height={64} />
         ) : live.isError ? (
@@ -33,13 +47,16 @@ export function EsportsPage() {
         ) : (
           <div className="flex flex-col gap-2">
             {(live.data ?? []).slice(0, 12).map((m) => (
-              <div key={m.match_id} className="surface-panel flex items-center gap-3 py-3">
+              <div
+                key={m.match_id}
+                className="surface-panel flex items-center gap-3 px-4 py-3 transition-all hover:border-accent/25"
+              >
                 <span className="flex items-center gap-1.5 text-[11px] font-medium text-loss">
-                  <Broadcast size={13} weight="fill" />
+                  <Broadcast size={13} weight="fill" className="animate-pulse" />
                   live
                 </span>
                 <span className="flex min-w-0 flex-1 items-center gap-2">
-                  <TeamBadge name={m.team_name_radiant} />
+                  <TeamBadge name={m.team_name_radiant} logoUrl={logoByName(m.team_name_radiant)} />
                   <span className="truncate text-[13px] text-ink-2">
                     {m.team_name_radiant ?? 'Radiant'}
                   </span>
@@ -47,7 +64,7 @@ export function EsportsPage() {
                     {m.radiant_score ?? 0}:{m.dire_score ?? 0}
                   </span>
                   <span className="truncate text-[13px] text-ink-2">{m.team_name_dire ?? 'Dire'}</span>
-                  <TeamBadge name={m.team_name_dire} />
+                  <TeamBadge name={m.team_name_dire} logoUrl={logoByName(m.team_name_dire)} />
                 </span>
                 <span className="hidden items-center gap-1 text-[11px] text-ink-3 sm:flex">
                   <Clock size={13} />
@@ -84,7 +101,7 @@ export function EsportsPage() {
                 <Link
                   key={m.match_id}
                   to={`/match/${m.match_id}`}
-                  className="flex items-center gap-3 py-3 transition-colors hover:bg-surface-2"
+                  className="flex items-center gap-3 py-3 transition-all hover:bg-surface-2 hover:px-1"
                 >
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
                     {m.league_name && (
@@ -94,7 +111,7 @@ export function EsportsPage() {
                       </span>
                     )}
                     <span className="flex min-w-0 items-center gap-2">
-                      <TeamBadge name={m.radiant_name} />
+                      <TeamBadge name={m.radiant_name} logoUrl={logoById(m.radiant_team_id)} />
                       <span className={`truncate text-[13px] ${radiantWon ? 'font-semibold text-ink' : 'text-ink-2'}`}>
                         {m.radiant_name ?? 'Radiant'}
                       </span>
@@ -104,7 +121,7 @@ export function EsportsPage() {
                       <span className={`truncate text-[13px] ${direWon ? 'font-semibold text-ink' : 'text-ink-2'}`}>
                         {m.dire_name ?? 'Dire'}
                       </span>
-                      <TeamBadge name={m.dire_name} />
+                      <TeamBadge name={m.dire_name} logoUrl={logoById(m.dire_team_id)} />
                     </span>
                   </div>
                   <span className="hidden shrink-0 items-center gap-1 text-[11px] text-ink-3 sm:flex">
@@ -112,7 +129,7 @@ export function EsportsPage() {
                     {duration(m.duration)}
                   </span>
                   <span className="hidden shrink-0 text-[11px] text-ink-3 md:block">{ago(m.start_time)}</span>
-                  <CaretRight size={14} className="shrink-0 text-ink-3" />
+                  <CaretRight size={14} className="shrink-0 text-ink-3 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               )
             })}

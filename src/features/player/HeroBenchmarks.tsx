@@ -57,9 +57,9 @@ export function HeroBenchmarks({ playerHeroes, accountId, heroes, loading }: Her
 
   if (loading) {
     return (
-      <div className="flex flex-col gap-2">
-        {Array.from({ length: 3 }, (_, i) => (
-          <Skeleton key={i} className="h-14 w-full rounded-block" />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {Array.from({ length: 4 }, (_, i) => (
+          <Skeleton key={i} className="aspect-square w-full rounded-panel" />
         ))}
       </div>
     )
@@ -75,7 +75,7 @@ export function HeroBenchmarks({ playerHeroes, accountId, heroes, loading }: Her
   }
 
   return (
-    <div className="flex flex-col divide-y divide-line">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       {top.map((row, index) => {
         const heroId = heroIds[index]
         const hero = heroId === undefined ? undefined : heroes?.get(heroId)
@@ -88,14 +88,16 @@ export function HeroBenchmarks({ playerHeroes, accountId, heroes, loading }: Her
         const ownXpm = totalsMean(ownTotals?.data, 'xp_per_min')
 
         return (
-          <div key={row.hero_id} className="flex flex-wrap items-center gap-x-6 gap-y-2 py-3">
-            <span className="flex min-w-[160px] items-center gap-2.5">
-              <HeroIcon hero={hero} size={28} />
-              <span className="truncate text-[13px] text-ink">{hero?.localized_name ?? '—'}</span>
+          <div key={row.hero_id} className="surface-panel surface-interactive flex aspect-square flex-col justify-between gap-2 p-3.5">
+            <span className="flex items-center gap-2">
+              <HeroIcon hero={hero} size={26} />
+              <span className="min-w-0 truncate text-[12px] text-ink">{hero?.localized_name ?? '—'}</span>
             </span>
 
-            <BenchmarkCell label="GPM" own={ownGpm} median={gpmMedian} pending={pending} />
-            <BenchmarkCell label="XPM" own={ownXpm} median={xpmMedian} pending={pending} />
+            <div className="flex flex-col gap-1.5">
+              <BenchmarkCell label="GPM" own={ownGpm} median={gpmMedian} pending={pending} />
+              <BenchmarkCell label="XPM" own={ownXpm} median={xpmMedian} pending={pending} />
+            </div>
           </div>
         )
       })}
@@ -114,9 +116,11 @@ function BenchmarkCell({ label, own, median, pending }: BenchmarkCellProps) {
   const delta = deltaShare(own, median)
 
   return (
-    <span className="flex min-w-[136px] items-center gap-2">
-      <span className="text-[11px] text-ink-3">{label}</span>
-      <span className="num text-[13px] text-ink">{num(own)}</span>
+    <div className="flex items-center justify-between gap-2">
+      <span className="flex items-baseline gap-1.5">
+        <span className="text-[11px] text-ink-3">{label}</span>
+        <span className="num text-[13px] text-ink">{num(own)}</span>
+      </span>
       {pending ? (
         <span className="text-[11px] text-ink-3">считаем</span>
       ) : median === null ? (
@@ -126,10 +130,10 @@ function BenchmarkCell({ label, own, median, pending }: BenchmarkCellProps) {
           <span
             className={`num cursor-help text-[11px] ${(delta ?? 0) >= 0 ? 'text-win' : 'text-loss'}`}
           >
-            {signedPct(delta)} к медиане
+            {signedPct(delta)}
           </span>
         </Tooltip>
       )}
-    </span>
+    </div>
   )
 }

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import type { Hero, HeroStat } from '@/shared/api/types'
 import { buildTierRows, BRACKETS } from './tierlist'
 import type { BracketKey } from './tierlist'
-import { ROLE_ORDER, roleLabel } from './heroRoles'
+import { CLASSIC_ROLE_ORDER, classicRole, classicRoleLabel } from './heroRoles'
 import { BracketFilter } from './BracketFilter'
 import { HeroIcon } from '@/shared/ui/HeroIcon'
 import { EmptyState } from '@/shared/ui/States'
@@ -26,9 +26,9 @@ export function MetaRoleGrid({ heroStats, heroes }: MetaRoleGridProps) {
 
   const byRole = useMemo(() => {
     const result = new Map<string, typeof rows>()
-    for (const role of ROLE_ORDER) {
+    for (const role of CLASSIC_ROLE_ORDER) {
       const list = rows
-        .filter((row) => row.games >= threshold && heroes?.get(row.heroId)?.roles.includes(role))
+        .filter((row) => row.games >= threshold && classicRole(heroes?.get(row.heroId)?.roles) === role)
         .sort((a, b) => b.winrate - a.winrate)
         .slice(0, PER_ROLE)
       result.set(role, list)
@@ -45,17 +45,17 @@ export function MetaRoleGrid({ heroStats, heroes }: MetaRoleGridProps) {
       <div className="flex flex-wrap items-center gap-3">
         <BracketFilter value={bracket} onChange={setBracket} />
         <span className="text-[11px] text-ink-3">
-          {BRACKETS.find((b) => b.key === bracket)?.label} · роли - теги OpenDota, у героя их обычно
-          несколько
+          {BRACKETS.find((b) => b.key === bracket)?.label} · роли - приближение к классическим 5 позициям
+          по тегам OpenDota, не точная статистика позиций
         </span>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {ROLE_ORDER.map((role) => {
+        {CLASSIC_ROLE_ORDER.map((role) => {
           const list = byRole.get(role) ?? []
           return (
-            <div key={role} className="surface-panel flex flex-col gap-2 p-3.5">
-              <span className="text-[12px] font-semibold text-ink">{roleLabel(role)}</span>
+            <div key={role} className="surface-panel surface-interactive flex flex-col gap-2 p-3.5">
+              <span className="text-[12px] font-semibold text-ink">{classicRoleLabel(role)}</span>
               {list.length === 0 ? (
                 <span className="text-[11px] text-ink-3">мало данных в этом бракете</span>
               ) : (

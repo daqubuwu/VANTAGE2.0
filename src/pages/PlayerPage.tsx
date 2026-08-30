@@ -21,7 +21,6 @@ import { MatchList, LoadMore } from '@/features/player/MatchList'
 import { MatchFilters } from '@/features/player/MatchFilters'
 import { TopHeroes } from '@/features/player/TopHeroes'
 import { HeroBenchmarks } from '@/features/player/HeroBenchmarks'
-import { RoleSplit } from '@/features/player/RoleSplit'
 import { Tabs } from '@/features/player/Tabs'
 import { usePlayerStats } from '@/features/player/usePlayerStats'
 import { totalsCount, totalsMean } from '@/features/player/totals'
@@ -113,6 +112,9 @@ export function PlayerPage() {
   )
   const heroRows = useMemo(() => buildHeroRows(heroesScope), [heroesScope])
   const heroesSummary = useMemo(() => aggregate(heroesScope), [heroesScope])
+
+  const overviewHeroScope = useMemo(() => scopeMatches(all, period, null, matchPositions), [all, period, matchPositions])
+  const overviewHeroRows = useMemo(() => buildHeroRows(overviewHeroScope), [overviewHeroScope])
 
   function openHeroInMatches(heroId: number) {
     setFilters({ heroId, outcome: 'all', role: heroesRole })
@@ -307,11 +309,11 @@ export function PlayerPage() {
             />
           </Section>
 
-          <Section title="Лучшие герои" aside="от 3 игр">
+          <Section title="Лучшие герои" aside={`от 3 игр · ${periodLabel(period)}`}>
             <TopHeroes
-              rows={playerHeroes.data ?? []}
+              rows={overviewHeroRows}
               heroes={heroes.data}
-              loading={playerHeroes.isPending}
+              loading={history.isPending}
             />
           </Section>
 
@@ -324,9 +326,6 @@ export function PlayerPage() {
             />
           </Section>
 
-          <Section title="По ролям" aside={stratzStatus.data ? `Stratz, ${periodLabel(period)}` : undefined}>
-            <RoleSplit accountId={valid ? accountId : undefined} days={periodDays(period)} stratzOk={stratzStatus.data === true} />
-          </Section>
         </div>
       )}
 
