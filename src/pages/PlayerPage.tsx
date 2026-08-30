@@ -29,6 +29,10 @@ import { periodDays, periodLabel } from '@/features/player/period'
 import type { PeriodKey } from '@/features/player/period'
 import { buildMatchPositions } from '@/features/player/matchPositions'
 import type { RoleKey } from '@/features/player/roles'
+import { scopeMatches, buildHeroRows } from '@/features/player/heroAggregate'
+import { aggregate } from '@/features/player/aggregate'
+import { PlayerHeroesTable } from '@/features/player/PlayerHeroesTable'
+import { RolePills } from '@/features/player/RolePills'
 import { Section } from '@/shared/ui/Surface'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { ErrorState } from '@/shared/ui/States'
@@ -53,6 +57,8 @@ export function PlayerPage() {
     outcome: 'all',
     role: null,
   })
+  const [heroesPeriod, setHeroesPeriod] = useState<PeriodKey>('all')
+  const [heroesRole, setHeroesRole] = useState<RoleKey | null>(null)
 
   useEffect(() => {
     if (tab === 'matches') setMatchesTabOpened(true)
@@ -100,6 +106,18 @@ export function PlayerPage() {
       return true
     })
   }, [pagedFlat, filters, matchPositions])
+
+  const heroesScope = useMemo(
+    () => scopeMatches(all, heroesPeriod, heroesRole, matchPositions),
+    [all, heroesPeriod, heroesRole, matchPositions],
+  )
+  const heroRows = useMemo(() => buildHeroRows(heroesScope), [heroesScope])
+  const heroesSummary = useMemo(() => aggregate(heroesScope), [heroesScope])
+
+  function openHeroInMatches(heroId: number) {
+    setFilters({ heroId, outcome: 'all', role: heroesRole })
+    setTab('matches')
+  }
 
   if (!valid) {
     return <ErrorState message="Некорректный идентификатор игрока в адресе страницы." />
@@ -355,14 +373,37 @@ export function PlayerPage() {
       )}
 
       {tab === 'heroes' && (
-        <Section title="Герои" aside="по числу игр">
-          <TopHeroes
-            rows={playerHeroes.data ?? []}
-            heroes={heroes.data}
-            loading={playerHeroes.isPending}
-            limit={40}
-            minGames={1}
-          />
+        <Section title="Герои" aside="источник - твоя история матчей, до 500 последних игр">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <PeriodFilter value={heroesPeriod} onChange={setHeroesPeriod} />
+              {stratzOk && <RolePills value={heroesRole} onChange={setHeroesRole} />}
+            </div>
+
+            {history.isPending ? (
+              <div className="flex flex-col gap-1.5">
+                {Array.from({ length: 8 }, (_, i) => (
+                  <Skeleton key={i} className="h-11 w-full rounded-block" />
+                ))}
+              </div>
+            ) : history.isError ? (
+              <ErrorState
+                message={history.error instanceof Error ? history.error.message : 'Неизвестная ошибка'}
+                onRetry={() => void history.refetch()}
+              />
+            ) : (
+              <PlayerHeroesTable
+                rows={heroRows}
+                summary={heroesSummary}
+                heroes={heroes.data}
+                onSelectHero={openHeroInMatches}
+              />
+            )}
+
+            <p className="text-[12px] text-ink-3">
+              Клик по герою переключает на вкладку «Матчи» с фильтром по этому герою.
+            </p>
+          </div>
         </Section>
       )}
     </div>
