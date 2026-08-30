@@ -1,7 +1,9 @@
 import type { Match } from '@/shared/api/types'
 import { ago, duration, num } from '@/shared/lib/format'
 import { ExportControls } from './ExportControls'
+import { useState } from 'react'
 import type { RefObject } from 'react'
+import { Copy, Check } from '@phosphor-icons/react'
 
 const GAME_MODE: Record<number, string> = {
   1: 'Все случайные',
@@ -45,12 +47,37 @@ export function MatchHeader({ match, exportRef }: MatchHeaderProps) {
         {parsed ? 'Разобран' : 'Не разобран'}
       </span>
 
-      <span className="num text-[12px] text-ink-3">ID {num(match.match_id)}</span>
+      <MatchIdCopy matchId={match.match_id} />
 
       <div className="ml-auto">
         <ExportControls targetRef={exportRef} fileName={`vantage-match-${match.match_id}`} />
       </div>
     </div>
+  )
+}
+
+function MatchIdCopy({ matchId }: { matchId: number }) {
+  const [copied, setCopied] = useState(false)
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(String(matchId))
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1600)
+    } catch {
+      // clipboard недоступен - тихо игнорируем, ссылка на матч уже копируется отдельной кнопкой
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => void copy()}
+      className="flex items-center gap-1.5 text-[12px] text-ink-3 transition-colors hover:text-accent active:translate-y-px"
+    >
+      <span className="num">ID {num(matchId)}</span>
+      {copied ? <Check size={12} className="text-win" /> : <Copy size={12} />}
+    </button>
   )
 }
 

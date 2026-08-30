@@ -15,6 +15,7 @@ import { Section } from '@/shared/ui/Surface'
 import { Skeleton, SkeletonRows } from '@/shared/ui/Skeleton'
 import { ErrorState, EmptyState } from '@/shared/ui/States'
 import { MatchHeader } from '@/features/match/MatchHeader'
+import { PicksBans } from '@/features/match/PicksBans'
 import { RosterTable } from '@/features/match/RosterTable'
 import { GoldTimeline } from '@/features/match/GoldTimeline'
 import { TimeSlider } from '@/features/match/TimeSlider'
@@ -91,11 +92,23 @@ export function MatchPage() {
           </div>
         )}
 
-        <Section title="Radiant" aside={`${data.radiant_score} убийств`}>
+        {data.picks_bans && data.picks_bans.length > 0 && (
+          <Section title="Пики и баны">
+            <PicksBans match={data} heroes={heroes.data} />
+          </Section>
+        )}
+
+        <Section
+          title="Radiant"
+          aside={minute !== null ? `${data.radiant_score} убийств · предметы на момент времени приблизительны` : `${data.radiant_score} убийств`}
+        >
           <RosterTable players={data.players} heroes={heroes.data} items={items.data} side="radiant" minute={minute} />
         </Section>
 
-        <Section title="Dire" aside={`${data.dire_score} убийств`}>
+        <Section
+          title="Dire"
+          aside={minute !== null ? `${data.dire_score} убийств · предметы на момент времени приблизительны` : `${data.dire_score} убийств`}
+        >
           <RosterTable players={data.players} heroes={heroes.data} items={items.data} side="dire" minute={minute} />
         </Section>
 
@@ -128,7 +141,9 @@ export function MatchPage() {
                 const build = buildAbilityBuild(heroAbilityMeta, abilityIds.data, player.ability_upgrades_arr)
                 return { player, hero, build }
               })
-              const visible = builds.filter(({ build }) => build.talents.some((tier) => tier.options.length > 0))
+              const visible = builds.filter(
+                ({ build }) => build.talents.some((tier) => tier.options.length > 0) || build.skills.length > 0,
+              )
 
               if (visible.length === 0) {
                 return (

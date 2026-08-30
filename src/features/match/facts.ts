@@ -2,9 +2,20 @@ import type { Hero, Match, MatchPlayer } from '@/shared/api/types'
 import { isRadiantSlot } from '@/shared/api/types'
 import { kda as kdaOf } from '@/shared/lib/format'
 
+export type MatchFactKind =
+  | 'firstblood'
+  | 'kda'
+  | 'networth'
+  | 'damage'
+  | 'towers'
+  | 'roshan'
+  | 'lane'
+  | 'comeback'
+
 export interface MatchFact {
   text: string
   tone: 'neutral' | 'win' | 'loss'
+  kind: MatchFactKind
 }
 
 function heroName(heroes: Map<number, Hero> | undefined, player: MatchPlayer) {
@@ -44,6 +55,7 @@ export function buildMatchFacts(match: Match, heroes: Map<number, Hero> | undefi
     facts.push({
       text: `Первая кровь на ${minute}:${String(second).padStart(2, '0')} - ${heroName(heroes, firstBlood.player)}.`,
       tone: playerTone(firstBlood.player, match.radiant_win),
+      kind: 'firstblood',
     })
   }
 
@@ -52,6 +64,7 @@ export function buildMatchFacts(match: Match, heroes: Map<number, Hero> | undefi
     facts.push({
       text: `Лучший KDA матча - ${heroName(heroes, bestKda.player)}, ${bestKda.value.toFixed(2)} (${bestKda.player.kills}/${bestKda.player.deaths}/${bestKda.player.assists}).`,
       tone: playerTone(bestKda.player, match.radiant_win),
+      kind: 'kda',
     })
   }
 
@@ -60,6 +73,7 @@ export function buildMatchFacts(match: Match, heroes: Map<number, Hero> | undefi
     facts.push({
       text: `Больше всех нетворса собрал ${heroName(heroes, bestNetworth.player)} - ${Math.round(bestNetworth.value / 1000)}k к концу матча.`,
       tone: playerTone(bestNetworth.player, match.radiant_win),
+      kind: 'networth',
     })
   }
 
@@ -68,6 +82,7 @@ export function buildMatchFacts(match: Match, heroes: Map<number, Hero> | undefi
     facts.push({
       text: `Больше всего урона по героям нанёс ${heroName(heroes, bestHeroDamage.player)} - ${Math.round(bestHeroDamage.value / 1000)}k.`,
       tone: playerTone(bestHeroDamage.player, match.radiant_win),
+      kind: 'damage',
     })
   }
 
@@ -76,6 +91,7 @@ export function buildMatchFacts(match: Match, heroes: Map<number, Hero> | undefi
     facts.push({
       text: `Больше всех вышек снёс ${heroName(heroes, bestTowers.player)} - ${bestTowers.value}.`,
       tone: playerTone(bestTowers.player, match.radiant_win),
+      kind: 'towers',
     })
   }
 
@@ -84,6 +100,7 @@ export function buildMatchFacts(match: Match, heroes: Map<number, Hero> | undefi
     facts.push({
       text: `На счету ${heroName(heroes, bestRoshan.player)} больше всех Рошанов - ${bestRoshan.value}.`,
       tone: playerTone(bestRoshan.player, match.radiant_win),
+      kind: 'roshan',
     })
   }
 
@@ -92,6 +109,7 @@ export function buildMatchFacts(match: Match, heroes: Map<number, Hero> | undefi
     facts.push({
       text: `Эффективнее всех отыграл линию ${heroName(heroes, bestLane.player)} - ${bestLane.value}%.`,
       tone: playerTone(bestLane.player, match.radiant_win),
+      kind: 'lane',
     })
   }
 
@@ -102,6 +120,7 @@ export function buildMatchFacts(match: Match, heroes: Map<number, Hero> | undefi
       facts.push({
         text: `Победившая команда отыгрывалась с отставанием до ${Math.round(Math.abs(worstDeficit) / 1000)}k золота.`,
         tone: 'neutral',
+        kind: 'comeback',
       })
     }
   }

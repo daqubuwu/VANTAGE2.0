@@ -41,7 +41,7 @@ export interface CommonHeroRow {
 export function commonHeroes(
   a: PlayerHeroRow[] | undefined,
   b: PlayerHeroRow[] | undefined,
-  minGames = 3,
+  minGames = 2,
 ): CommonHeroRow[] {
   if (!a || !b) return []
   const byIdB = new Map(b.map((row) => [row.hero_id, row]))
@@ -52,7 +52,7 @@ export function commonHeroes(
       rows.push({ heroId: Number(rowA.hero_id), a: rowA, b: rowB })
     }
   }
-  return rows.sort((x, y) => y.a.games + y.b.games - (x.a.games + x.b.games)).slice(0, 10)
+  return rows.sort((x, y) => y.a.games + y.b.games - (x.a.games + x.b.games)).slice(0, 12)
 }
 
 export function commonMatches(a: PlayerMatch[] | undefined, b: PlayerMatch[] | undefined): PlayerMatch[] {

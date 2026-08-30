@@ -86,9 +86,10 @@ export const playerHeroes = HERO_NAMES.map(([id]) => {
 export const peers = []
 
 const ITEM_NAMES = ['blink', 'black_king_bar', 'power_treads', 'magic_wand', 'aghanims_scepter', 'butterfly']
+const NEUTRAL_ITEM_NAME = 'trusty_shovel'
 
 export const items = Object.fromEntries(
-  ITEM_NAMES.map((key, i) => [
+  [...ITEM_NAMES, NEUTRAL_ITEM_NAME].map((key, i) => [
     key,
     { id: i + 1, dname: key.replace(/_/g, ' '), img: `/${key}.png`, cost: 1000 + i * 500 },
   ]),
@@ -207,7 +208,7 @@ export function match(matchId) {
     const deaths = Math.floor(rnd() * 8)
     const assists = Math.floor(rnd() * 15)
     return {
-      account_id: 898936527 + i,
+      account_id: i === 1 ? null : 898936527 + i,
       player_slot: radiant ? i : 128 + i,
       hero_id: hero[0],
       personaname: `player_${i}`,
@@ -239,7 +240,7 @@ export function match(matchId) {
       item_3: 0,
       item_4: 0,
       item_5: 0,
-      item_neutral: null,
+      item_neutral: i === 0 ? 7 : null,
       ability_upgrades_arr: [1, 2, 1, 2, 1, 2, 1, 3, 2, 2, 2, 1, 1, 1, 4, 2, 1, 5, 2, 1, 1, 2, 2, 2, 6],
       lane_efficiency_pct: 60 + Math.floor(rnd() * 40),
       teamfight_participation: rnd(),
@@ -269,8 +270,26 @@ export function match(matchId) {
     objectives: [],
     radiant_gold_adv: radiantGoldAdv,
     radiant_xp_adv: radiantGoldAdv.map((v) => Math.round(v * 0.8)),
-    picks_bans: null,
+    picks_bans: buildPicksBans(players),
   }
+}
+
+function buildPicksBans(players) {
+  const entries = []
+  let order = 0
+  for (let i = 0; i < 2; i++) {
+    entries.push({ is_pick: false, hero_id: HERO_NAMES[(i * 3) % HERO_NAMES.length][0], team: 0, order: order++ })
+    entries.push({ is_pick: false, hero_id: HERO_NAMES[(i * 3 + 1) % HERO_NAMES.length][0], team: 1, order: order++ })
+  }
+  for (const player of players) {
+    entries.push({
+      is_pick: true,
+      hero_id: player.hero_id,
+      team: player.isRadiant ? 0 : 1,
+      order: order++,
+    })
+  }
+  return entries
 }
 
 const STRATZ_POSITIONS = ['POSITION_1', 'POSITION_2', 'POSITION_3', 'POSITION_4', 'POSITION_5']

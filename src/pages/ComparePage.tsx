@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { usePlayer, usePlayerTotals, usePlayerHeroes, usePlayerHistory, useHeroes } from '@/shared/api/queries'
 import { useDocumentTitle } from '@/shared/lib/useDocumentTitle'
 import { Section } from '@/shared/ui/Surface'
@@ -13,6 +13,7 @@ import { buildMetrics, commonHeroes, commonMatches } from '@/features/compare/co
 import { PeriodFilter } from '@/features/player/PeriodFilter'
 import { periodDays } from '@/features/player/period'
 import type { PeriodKey } from '@/features/player/period'
+import { UserCircle, ArrowsLeftRight } from '@phosphor-icons/react'
 
 export function ComparePage() {
   const { a, b } = useParams<{ a: string; b: string }>()
@@ -104,13 +105,10 @@ function CompareContent({ accountA, accountB }: CompareContentProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="grid grid-cols-2 gap-4 text-center">
-        <span className="truncate text-[18px] font-semibold text-ink">
-          {profileA.data?.profile?.personaname ?? `Аккаунт ${accountA}`}
-        </span>
-        <span className="truncate text-[18px] font-semibold text-ink">
-          {profileB.data?.profile?.personaname ?? `Аккаунт ${accountB}`}
-        </span>
+      <div className="surface-panel grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+        <PlayerHeaderCell accountId={accountA} name={profileA.data?.profile?.personaname} avatar={profileA.data?.profile?.avatarfull} align="right" />
+        <ArrowsLeftRight size={20} className="shrink-0 text-ink-3" />
+        <PlayerHeaderCell accountId={accountB} name={profileB.data?.profile?.personaname} avatar={profileB.data?.profile?.avatarfull} align="left" />
       </div>
 
       <Section title="Метрики">
@@ -126,11 +124,14 @@ function CompareContent({ accountA, accountB }: CompareContentProps) {
         )}
       </Section>
 
-      <Section title="Общие герои" aside="от 3 игр у каждого">
+      <Section title="Общие герои" aside="каждый сыграл от 2 игр, необязательно вместе">
         {heroesA.isPending || heroesB.isPending ? (
           <SkeletonRows rows={5} height={40} />
         ) : heroPairs.length === 0 ? (
-          <EmptyState title="Общих героев не нашли" hint="Нужно минимум 3 игры у каждого на одном герое." />
+          <EmptyState
+            title="Общих героев не нашли"
+            hint="Нужно минимум 2 игры у каждого на одном герое - при узком пуле героев такое пересечение бывает пустым. Ниже есть блок общих матчей, если оба играли в одной игре."
+          />
         ) : (
           <div className="flex flex-col divide-y divide-line">
             {heroPairs.map((pair) => (
@@ -144,5 +145,30 @@ function CompareContent({ accountA, accountB }: CompareContentProps) {
         {historyA.isPending || historyB.isPending ? <SkeletonRows rows={5} height={40} /> : <CommonMatchesList matches={matches} />}
       </Section>
     </div>
+  )
+}
+
+interface PlayerHeaderCellProps {
+  accountId: number
+  name: string | null | undefined
+  avatar: string | null | undefined
+  align: 'left' | 'right'
+}
+
+function PlayerHeaderCell({ accountId, name, avatar, align }: PlayerHeaderCellProps) {
+  return (
+    <Link
+      to={`/player/${accountId}`}
+      className={`flex min-w-0 items-center gap-3 ${align === 'right' ? 'flex-row-reverse text-right' : 'text-left'}`}
+    >
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-ctl bg-surface-2 text-ink-3">
+        {avatar ? (
+          <img src={avatar} alt="" className="h-full w-full object-cover" loading="lazy" />
+        ) : (
+          <UserCircle size={22} />
+        )}
+      </span>
+      <span className="truncate text-[16px] font-semibold text-ink">{name ?? `Аккаунт ${accountId}`}</span>
+    </Link>
   )
 }

@@ -1,6 +1,6 @@
 import type { MatchPlayer } from '@/shared/api/types'
 import { itemImage } from '@/shared/api/images'
-import { itemSlotIds, purchaseTime } from './itemSlotFields'
+import { itemSlotIds, neutralItemId, purchaseTime } from './itemSlotFields'
 import { Tooltip } from '@/shared/ui/Tooltip'
 import { mmss } from '@/shared/lib/format'
 
@@ -19,6 +19,8 @@ interface ItemSlotsProps {
 export function ItemSlots({ player, items, upToMinute }: ItemSlotsProps) {
   const slots = itemSlotIds(player)
   const cutoff = upToMinute === null ? null : upToMinute * 60
+  const neutralId = neutralItemId(player)
+  const neutralMeta = neutralId ? items?.get(neutralId) : undefined
 
   return (
     <div className="flex gap-1">
@@ -51,6 +53,30 @@ export function ItemSlots({ player, items, upToMinute }: ItemSlotsProps) {
           </Tooltip>
         )
       })}
+      <Tooltip
+        variant="entity"
+        content={
+          neutralMeta ? (
+            <div className="flex flex-col gap-1">
+              <span className="text-ink">{neutralMeta.dname}</span>
+              <span className="text-ink-3">Нейтральный предмет</span>
+            </div>
+          ) : (
+            'Нейтральный предмет не найден'
+          )
+        }
+      >
+        <span className="relative block h-7 w-9 shrink-0 overflow-hidden rounded-[4px] border border-warm/30 bg-surface-2">
+          {neutralMeta && (
+            <img
+              src={itemImage(neutralMeta.key)}
+              alt={neutralMeta.dname}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+          )}
+        </span>
+      </Tooltip>
     </div>
   )
 }
