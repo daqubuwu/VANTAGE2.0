@@ -69,7 +69,7 @@ function ItemCell({ meta, since }: { meta: ItemMeta | undefined; since?: number 
       }
     >
       <span className="relative block h-7 w-9 shrink-0 overflow-hidden rounded-[4px] bg-surface-2">
-        {meta && <img src={itemImage(meta.key)} alt={meta.dname} crossOrigin="anonymous" className="h-full w-full object-cover" loading="lazy" />}
+        {meta && <img src={itemImage(meta.key)} alt={meta.dname} className="h-full w-full object-cover" loading="lazy" />}
       </span>
     </Tooltip>
   )
@@ -92,7 +92,7 @@ function NeutralCell({ meta }: { meta: ItemMeta | undefined }) {
     >
       <span className="relative block h-7 w-9 shrink-0 overflow-hidden rounded-[4px] border border-warm/30 bg-surface-2">
         {meta && (
-          <img src={itemImage(meta.key)} alt={meta.dname} crossOrigin="anonymous" className="h-full w-full object-cover" loading="lazy" />
+          <img src={itemImage(meta.key)} alt={meta.dname} className="h-full w-full object-cover" loading="lazy" />
         )}
       </span>
     </Tooltip>

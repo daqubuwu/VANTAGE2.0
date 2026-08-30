@@ -36,7 +36,7 @@ export function PlayerHeader({ accountId, profile, loading }: PlayerHeaderProps)
     <div className="surface-feature flex flex-wrap items-center gap-4 px-5 py-4">
       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-block bg-surface-2">
         {person?.avatarfull ? (
-          <img src={person.avatarfull} alt="" width={64} height={64} crossOrigin="anonymous" className="h-full w-full object-cover" />
+          <img src={person.avatarfull} alt="" width={64} height={64} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-ink-3">
             <LockSimple size={22} />
@@ -70,8 +70,8 @@ export function PlayerHeader({ accountId, profile, loading }: PlayerHeaderProps)
       <div className="ml-auto flex items-center gap-2.5">
         <Tooltip content={`Ранг: ${rankName(profile?.rank_tier ?? null)}`} variant="hint">
           <div className="relative h-12 w-12 shrink-0">
-            <img src={rankIcon(profile?.rank_tier ?? null)} alt="" crossOrigin="anonymous" className="h-full w-full" />
-            {star && <img src={star} alt="" crossOrigin="anonymous" className="absolute inset-0 h-full w-full" />}
+            <img src={rankIcon(profile?.rank_tier ?? null)} alt="" className="h-full w-full" />
+            {star && <img src={star} alt="" className="absolute inset-0 h-full w-full" />}
           </div>
         </Tooltip>
         <div className="flex flex-col">

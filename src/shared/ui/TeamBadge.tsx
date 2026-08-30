@@ -28,7 +28,6 @@ export function TeamBadge({ name, logoUrl, size = 26 }: TeamBadgeProps) {
         <img
           src={logoUrl}
           alt=""
-          crossOrigin="anonymous"
           className="h-full w-full object-contain"
           onError={() => setBroken(true)}
         />

@@ -32,7 +32,6 @@ export function TalentTree({ build, abilities }: TalentTreeProps) {
                       alt={label(skill.name, abilities)}
                       className="h-full w-full object-cover"
                       loading="lazy"
-                      crossOrigin="anonymous"
                     />
                   )}
                   <span className="num absolute bottom-0 right-0 rounded-tl-[3px] bg-bg/80 px-[3px] text-[8px] leading-[11px] text-ink-2">

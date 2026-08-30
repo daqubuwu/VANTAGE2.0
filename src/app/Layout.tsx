@@ -124,7 +124,7 @@ function FavoritesMenu() {
                 className="flex min-w-0 flex-1 items-center gap-2.5"
               >
                 <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full bg-surface-2">
-                  {account.avatar && <img src={account.avatar} alt="" crossOrigin="anonymous" className="h-full w-full object-cover" />}
+                  {account.avatar && <img src={account.avatar} alt="" className="h-full w-full object-cover" />}
                 </span>
                 <span className="truncate text-[13px] text-ink-2 group-hover:text-ink">{account.name}</span>
               </Link>

@@ -50,7 +50,6 @@ export function ItemPopularityPhases({ phases }: ItemPopularityPhasesProps) {
                           alt={item.meta.dname}
                           className="h-full w-full object-cover"
                           loading="lazy"
-                          crossOrigin="anonymous"
                         />
                       </span>
                       <span className="truncate text-[12px] text-ink-2">{item.meta.dname}</span>

@@ -25,7 +25,6 @@ export function HeroHeader({ hero }: { hero: Hero }) {
           alt={hero.localized_name}
           className="h-full w-full object-cover"
           loading="lazy"
-          crossOrigin="anonymous"
         />
       </span>
       <div className="flex flex-col gap-1.5">
